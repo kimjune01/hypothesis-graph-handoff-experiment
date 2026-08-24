@@ -41,3 +41,39 @@ Each candidate is checked against the seven clauses in *How to Audit a Benchmark
 ## Selection implication
 
 Post-cutoff issue dates are necessary but insufficient. A pilot task also needs a frozen pre-diagnosis issue view, an independent accepted oracle, and no public solution path available to Agent B. Existing Verus or flux artifacts may satisfy the oracle requirement, but their suitability for a fresh cross-agent handoff must be audited separately.
+
+## Rejected: `flux-rs/flux#1532`
+
+- **Claim:** would test resumption of a localized compiler ICE investigation.
+- **Spec:** narrow and clear.
+- **Oracle/frame:** incomplete in the recorded environment because the SMT backend was unavailable.
+- **Gold:** a prior unaided agent already found the intended fix, creating a strong ceiling-effect warning.
+- **Decay:** the issue title itself localizes the relevant construct.
+
+**Decision:** reject because the environment was not independently gradeable and the baseline already solved it.
+
+## Rejected: `antonmedv/fx#415`
+
+- **Claim:** would strongly test safe inheritance because the recorded inquiry stopped at a plausible but false verdict before a later deterministic reproduction overturned it.
+- **Spec:** clear once the interactive behavior is reproduced.
+- **Oracle/frame:** an OSC/DSR-answering PTY harness can distinguish the node-pipe failure while preserving file and cat modes.
+- **Gold:** weaker than desired: the fix and grader were independently motivated by termios evidence, but no maintainer-accepted fix exists.
+- **Score:** mechanical.
+- **Decay:** controllable with a frozen issue snapshot and no network.
+- **Projection gate:** fatal. The original raw Round 1–2 trajectory is unavailable, so transcript and structured-handoff arms would have to be reconstructed from the graph itself.
+
+**Decision:** reject. It is an excellent handoff shape but cannot support honest same-run projections.
+
+## Selected pilot: bounded two-seed claim
+
+The pilot moves from a GitHub issue to a bounded mathematical decision problem derived from the Lonely Runner case study.
+
+- **Claim:** tests whether a graph helps an agent inherit and challenge a finite conjecture search, not whether it improves mathematics generally.
+- **Spec:** exact; see `preregistration.md`.
+- **Oracle:** exact rational recomputation of maximum loneliness plus exhaustive coefficient enumeration.
+- **Frame:** the verifier checks domain membership, primitivity, distinctness, the spectral-band predicate, and failure of every seed set of size at most two.
+- **Gold:** an existing counterexample is known, but is quarantined from both agents. The verifier is independently reimplemented from the mathematical specification.
+- **Score:** task success and trial duplication are mechanically recomputable from retained artifacts.
+- **Decay:** the source repository is public. Agents run without network access and without filesystem access to it; canary strings detect direct leakage.
+
+**Decision:** select, subject to the verifier passing its hidden positive and negative fixtures before Agent A begins.

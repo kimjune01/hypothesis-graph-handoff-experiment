@@ -1,0 +1,20 @@
+{
+  "agent_a": {
+    "cli": "codex-cli 0.149.0",
+    "model": "gpt-5.4",
+    "wall_time_seconds": 1200
+  },
+  "agent_b": {
+    "cli": "Claude Code 2.1.227",
+    "model": "claude-sonnet-4-6",
+    "max_budget_usd": 5,
+    "wall_time_seconds": 1200,
+    "runs_per_condition": 1
+  },
+  "artifact_generator": {
+    "cli": "Claude Code 2.1.227",
+    "model": "claude-sonnet-4-6",
+    "max_budget_usd": 2
+  },
+  "conditions": ["restart", "transcript", "structured", "graph"]
+}

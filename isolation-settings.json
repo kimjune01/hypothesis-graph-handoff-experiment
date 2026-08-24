@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "WebSearch",
+      "WebFetch",
+      "Read(/Users/junekim/Documents/lonely-runner/**)",
+      "Read(/Users/junekim/Documents/hypothesis-graph-handoff-experiment/grader/**)",
+      "Read(/Users/junekim/Documents/hypothesis-graph-handoff-experiment/tests/**)",
+      "Bash(*lonely-runner*)",
+      "Bash(*hypothesis-graph-handoff-experiment/grader*)",
+      "Bash(*hypothesis-graph-handoff-experiment/tests*)"
+    ]
+  }
+}

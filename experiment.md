@@ -2,7 +2,7 @@
 
 ## Research question
 
-Can a second coding agent resume, verify, or challenge a first agent's unfinished inquiry more cheaply and reliably from a replayable hypothesis graph than from no memory, a raw transcript, a prose summary, an ordinary provenance log, or a structured handoff?
+Can a second agent resume, verify, or challenge a first agent's unfinished inquiry more cheaply and reliably from a replayable hypothesis graph than from no memory, a raw transcript, or a strong structured handoff?
 
 The experiment measures the value of the **persisted representation at an agent boundary**. It does not test whether a hypothesis graph makes the first agent reason better.
 
@@ -10,8 +10,8 @@ The experiment measures the value of the **persisted representation at an agent 
 
 ### In scope
 
-- One coding inquiry begun by Agent A and continued by Agent B.
-- Post-cutoff repository bugs whose correct resolution is mechanically gradeable.
+- One bounded mathematical inquiry begun by Agent A and continued by Agent B.
+- A finite decision problem whose counterexamples and certificates are mechanically gradeable.
 - Inquiries long enough to contain a genuine diagnosis, at least one plausible wrong turn, and useful unfinished work at the handoff point.
 - The information Agent B can recover, check, reject, and reuse from different projections of the same Agent A run.
 - Task outcome, resumption cost, duplicated work, false-claim inheritance, premise localization, retraction, and review cost.
@@ -23,7 +23,7 @@ The experiment measures the value of the **persisted representation at an agent 
 - General long-term memory, personal memory, conversational recall, preference retention, or retrieval at scale.
 - Cross-task learning from one issue to a related issue.
 - Training, fine-tuning, or changing model weights.
-- Claims about all software tasks. The target regime is localization-hard, verification-bottlenecked debugging.
+- Claims about all tasks or mathematics in general. The pilot regime is bounded conjecture testing with exact verification.
 
 ## Claims this experiment can support
 
@@ -90,7 +90,7 @@ All derived artifacts must come from the same source trajectory. Artifact sizes 
 
 ### Primary outcomes
 
-1. **Task completion:** whether Agent B produces a patch that passes the independent grader.
+1. **Task completion:** whether Agent B produces a proof certificate or counterexample that passes the independent verifier.
 2. **Resumption cost:** tokens, dollars, commands, and wall time until Agent B performs its first useful action not already completed by Agent A.
 3. **Duplicated work:** Agent B commands or trials semantically equivalent to completed Agent A work, reported as a count and share of Agent B's pre-solution actions.
 4. **False-claim inheritance:** whether Agent B acts on an Agent A claim whose recorded or seeded trial fails.
@@ -126,15 +126,14 @@ After a declared root fails, Agent B marks every dependent conclusion unsupporte
 
 ## Task selection
 
-Use post-cutoff bugs from public repositories, sampled through a declared procedure rather than selected only after the graph succeeds.
+The pilot uses a freshly generated inquiry into a bounded mathematical claim. Later studies should sample tasks through a declared procedure rather than selecting only cases where the graph succeeds.
 
 Each task must satisfy all of the following:
 
-- The issue and accepted fix postdate the tested models' documented knowledge boundary.
-- A clean environment and independent grader can be pinned.
-- The visible suite permits at least one plausible but incomplete diagnosis or patch.
+- A clean task environment and independent verifier can be pinned.
+- The visible problem permits plausible but incomplete approaches.
 - Agent A requires enough investigation for a handoff to contain useful state.
-- The final outcome and decisive intermediate trials can be replayed.
+- The final outcome and decisive intermediate trials can be replayed exactly.
 
 Run a recall probe for each task. Report exclusions and failed setup attempts. Do not replace hard nulls after observing condition results.
 
@@ -162,13 +161,13 @@ A separate root-pull perturbation invalidates one previously accepted premise af
 
 ## Procedure
 
-1. Freeze the task, repository state, environment, grader, model versions, prompts, and budgets.
+1. Freeze the task, environment, verifier, model versions, prompts, and budgets.
 2. Run Agent A once under the inquiry harness and retain its full artifacts.
 3. Stop at the preregistered handoff point.
 4. Generate all six handoff conditions from that same trajectory.
 5. Randomize condition order and run fresh Agent B instances in isolated environments.
 6. Apply the natural, seeded, and root-pull probes according to the preregistration.
-7. Grade final patches with the independent grader.
+7. Grade final certificates with the independent verifier.
 8. Derive mechanical metrics from command logs and recorded trials.
 9. Have blind adjudicators resolve only the equivalence judgments that cannot be computed.
 10. Give Agent C the final result and its condition-specific record, then measure review cost.
@@ -202,7 +201,7 @@ The graph is useful if it reduces resumption or review cost without reducing tas
 
 The preferred reporting form is concrete:
 
-> On [N] preregistered post-cutoff, localization-hard coding inquiries, Agent B receiving a hypothesis graph achieved [completion result] while using [cost difference] to resume, repeating [duplication difference] fewer completed trials, and inheriting [false-claim difference] fewer refuted claims than [strongest baseline].
+> On [N] preregistered bounded mathematical inquiries, Agent B receiving a hypothesis graph achieved [completion result] while using [cost difference] to resume, repeating [duplication difference] fewer completed trials, and inheriting [false-claim difference] fewer refuted claims than [strongest baseline].
 
 Omit any clause whose outcome was not measured or did not separate. Report the paired cases and denominators next to the aggregate.
 
@@ -236,11 +235,11 @@ The two experiments support separable claims:
 
 ## Minimum viable pilot
 
-- Three post-cutoff tasks.
+- One bounded counterexample-search task for the instrumentation pilot.
 - One fixed Agent A trajectory per task.
 - Four initial conditions: restart, transcript, strong structured handoff, hypothesis graph.
-- Two Agent B families.
-- One natural false premise and one seeded false premise per task.
-- Mechanical grading of completion, cost, duplicate commands, replay, and inheritance.
+- One Agent B family, with a second family only after the harness is validated.
+- A natural false premise if one occurs; no seeded premise in the first run.
+- Mechanical grading of completion, cost, duplicate trials, replay, and inheritance.
 
 The pilot tests whether the instrumentation works. It does not support a rate claim. Expand only after the scoring rules and task-selection procedure survive the pilot without retrospective repair.

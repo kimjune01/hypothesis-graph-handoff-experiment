@@ -1,0 +1,5 @@
+bat-v0.26.1/
+pilot-3724/
+.venv/
+__pycache__/
+.pytest_cache/
