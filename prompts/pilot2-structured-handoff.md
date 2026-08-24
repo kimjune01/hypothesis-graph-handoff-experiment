@@ -1,0 +1,3 @@
+Transform the supplied Agent A transcript into a structured handoff with exactly these sections: Objective, Current State, Decisions, Evidence, Constraints, Next Actions, Open Questions.
+
+Do not use Markdown tables. Preserve failed trials and uncertainty, not only conclusions. Do not add facts, mathematical claims, trials, or outcomes absent from the transcript. Every factual sentence and every bullet must end with one or more transcript event identifiers in square brackets, such as `[event-17]`. A citation after a paragraph or list does not cover preceding sentences or bullets. Output only the handoff artifact.
