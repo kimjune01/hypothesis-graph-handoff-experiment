@@ -95,3 +95,22 @@ Receipt: commit `747b41a`; `ecological-ablation-results.md`; `ecological-result-
 - Added a receiver prompt instructing the continuation agent not to re-derive established proofs by default, but to replay attached checks when receipts are stale, inconsistent, challenged, or rooted in changed inputs.
 - This change is prospective. No chained-verification task has been selected and no outcome under these prompts has been observed.
 - Future Notes and Graph artifacts must contain the same verification primitives; their difference should be chronological versus dependency-structured organization, not bare assertions versus executable receipts.
+
+## 2026-08-24 — Prospective 2x2 task-selection consultation begins
+
+- Began a Claude consultation before selecting either task for the planned 2x2.
+- Required one chained-verification task and one neutral-continuation task, each crossed with Notes and Graph memory.
+- Selection criteria were fixed before recommendations: exact mechanical grading; fresh Agent A trajectories; completed proof or certificate checkpoints for the chained task; downstream work that uses rather than merely re-proves those checkpoints; comparable surface difficulty; no answer leakage; and checks cheaper than original discovery.
+- No task has been selected and no 2x2 outcome has been run.
+
+## 2026-08-24 — Prospective 2x2 task family selected provisionally
+
+- Claude's first suggestions included a linear-system handoff whose downstream task used only the final null-space basis. We rejected it because the earlier checkpoints were decorative rather than necessary.
+- A bounded null-space replacement was rejected because it hid provenance roots from Agent B and its independent step bounds did not safely characterize their combined feasible region.
+- We proposed three discrete-log residues composed by CRT for the chained task and one matched-cost discrete log for the neutral task.
+- Claude identified a fatal one-versus-three item-count confound: memory load, payload size, and retrieval surface would vary with task structure.
+- We corrected the neutral task to three independent discrete logs with three independent downstream outputs. The joint task uses the same three kinds of residues but requires their composition through CRT.
+- Provisionally selected this `CRT versus independent outputs` family, conditional on a construction audit, oracle-CRT ceiling test, per-residue deletion ablations, no-handoff baseline, corrupted-receipt test, and matched artifact construction.
+- No instances have been generated and no outcome has been observed.
+
+Receipt: `2x2-task-selection.md` and the commit containing this entry.
