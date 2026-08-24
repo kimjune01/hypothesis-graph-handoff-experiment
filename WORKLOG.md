@@ -123,3 +123,14 @@ Receipt: `2x2-task-selection.md` and the commit containing this entry.
 - Chose one shared set of three discrete-log instances for both task regimes. Agent A's discoveries can therefore be held fixed; only Agent B's downstream obligation changes.
 - Froze Agent A's public task and protocol prompt. The task withholds downstream use so Agent A cannot tailor checkpoint discovery to either experimental row.
 - No Agent A or Agent B outcome has yet been observed.
+
+## 2026-08-24 — Agent A outcome and primary protocol freeze
+
+- The first Agent A launch failed before receiving a prompt because a shell substitution expanded to empty. Preserved as `agent-a-session.jsonl`; it performed no task work.
+- The direct-stdin relaunch completed all three discrete logs with baby-step giant-step and independently replayed every modular-exponentiation receipt.
+- Agent A reported residues `112107027`, `819310576`, and `873153835`. Its run cost USD 0.650285 and used six turns; raw trace and working files are preserved under `runs/2x2/agent-a/`.
+- Discovery was unexpectedly cheap in local Python (0.00–0.01 seconds per instance), weakening the discovery-versus-replay cost contrast. We retained the task rather than replacing it after outcome observation.
+- Froze the 2×2 preregistration, Agent B prompt, downstream tasks, and four task-aware memory projections before any Agent B or control result.
+- The Joint and Independent rows contain the same three checkpoints. Notes and Graph state the same downstream dependencies; only chronological prose versus explicit node/edge organization changes.
+
+Receipt: `2x2-preregistration.md`, `artifacts/2x2/`, `prompts/2x2-agent-b.md`, and the next commit.
