@@ -146,3 +146,13 @@ Receipt: `2x2-preregistration.md`, `artifacts/2x2/`, `prompts/2x2-agent-b.md`, a
 - Interpretation fixed as a protocol-transfer success but a null/contrary result for the graph-format interaction in this construction pilot. No run was replaced.
 
 Receipt: `2x2-results.md`, `2x2-result-hypothesis-graph.md`, `runs/2x2/`, and the next commit.
+
+## 2026-08-24 — Prospective expensive-checkpoint recovery design
+
+- Reframed the next study as a mechanism demonstration rather than an underpowered population comparison. One frozen adversarial case may support an existence claim; it cannot estimate frequency or average benefit.
+- Consulted Claude on a tunably expensive proof-of-work construction. Accepted its six-node branching DAG and correction that corruption must target a source with descendants, not a leaf.
+- Fixed the prospective corruption target `N1`, exact retraction set `{N1, D12, E}`, and preservation set `{N2, N3, D23}`.
+- Separated the primary verifiability claim from the conditional Graph-versus-Notes claim. A Notes success will be reported as a representation null, not followed by retrospective task hardening.
+- No instance, artifact, or recovery outcome has been generated.
+
+Receipt: `pow-recovery-design.md` and the next commit.
