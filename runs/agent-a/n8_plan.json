@@ -1,0 +1,20 @@
+{
+  "execution_notes": [
+    "The exact predicate implementation is already in search_prep.py.",
+    "To respect the current instruction set, do not call any function that iterates over combinations(..., 8) during this preparatory phase.",
+    "A future operator can implement chunk execution by adding a generator over combinations(range(1, max_height + 1), 8)."
+  ],
+  "parameters": {
+    "chunk_size": 2500,
+    "max_height": 20,
+    "n": 8
+  },
+  "phases": [
+    "Generate the primitive increasing 8-tuples lazily in lexicographic order.",
+    "Assign tuples to chunks of at most chunk_size candidates without precomputing the full list.",
+    "For each chunk, run the exact band predicate first.",
+    "Only on surviving band tuples, run the seed-certificate audit.",
+    "Persist per-chunk JSON receipts and a final merged report."
+  ],
+  "purpose": "Executable plan for a future n=8 search. This function does not enumerate or evaluate any n=8 tuple."
+}

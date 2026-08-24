@@ -3,3 +3,4 @@ pilot-3724/
 .venv/
 __pycache__/
 .pytest_cache/
+.uv-cache/

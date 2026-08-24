@@ -1,0 +1,25 @@
+{
+  "protocol_status": "complete",
+  "protocol_deviation": false,
+  "model": "gpt-5.4",
+  "cli": "codex-cli 0.149.0",
+  "thread_id": "01a0352d-5b88-78c3-ae39-9c24655f3141",
+  "input_tokens": 529937,
+  "cached_input_tokens": 496640,
+  "output_tokens": 10157,
+  "reasoning_output_tokens": 3973,
+  "transcript_events": 65,
+  "canary_matches": 0,
+  "evaluated_n8_tuple": false,
+  "tests": "8 passed with python3 -m unittest -v",
+  "note": "uv failed in the Codex sandbox; Agent A used the system Python interpreter.",
+  "sha256": {
+    "search_prep.py": "8685cb69d197d4ca44ea191f776ab41061f05d404a293f99fde76f857fa89db0",
+    "prepare_phase.py": "3ff802b1099939005835d9e926f6da3355cd6eea9a6727cda32c5501cb6402ad",
+    "test_search_prep.py": "15f17d2735b98928a0c232cf881d929829d1d1bf207d5f966fcf1d34505847f7",
+    "audit_receipt.json": "bace047b4109d2025852a5d02f9d8a926937b15f8437c5c19ad9cbeed487d869",
+    "n8_plan.json": "164a9d2dc50aea5333f870ed9d0877bfcba66ed63f74ceebbaac4f5ade8075a1",
+    "agent-a-transcript.jsonl": "2982dc7c47a4ca8c527b84206b59adc756a91b722441700f6cb694e67f1caab3",
+    "agent-a-transcript.events.jsonl": "c5d7d0b0882628886210f8eb8c046d7472b87ea2a2c73c69fb5ae9e716b5841a"
+  }
+}
