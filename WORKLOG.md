@@ -134,3 +134,15 @@ Receipt: `2x2-task-selection.md` and the commit containing this entry.
 - The Joint and Independent rows contain the same three checkpoints. Notes and Graph state the same downstream dependencies; only chronological prose versus explicit node/edge organization changes.
 
 Receipt: `2x2-preregistration.md`, `artifacts/2x2/`, `prompts/2x2-agent-b.md`, and the next commit.
+
+## 2026-08-24 — 2x2 primary runs, controls, and diagnostics
+
+- Ran controls first: Oracle Joint passed without DLog search; No-handoff Joint passed after three BSGS searches.
+- Ran the four primary cells in preregistered order: Independent–Graph, Joint–Notes, Independent–Notes, Joint–Graph.
+- Applied the hidden exact grader only after all four primary runs finished. All four passed.
+- Every primary cell inherited all three residues, replayed all three cheap receipts, and ran zero discrete-log searches. The predicted difference in unnecessary rederivation was therefore null.
+- Graph minus Notes duration was -0.374 seconds for Independent and +10.599 seconds for Joint, yielding an unfavorable +10.973-second descriptive interaction. The corresponding cost interaction was +$0.061178 against Graph.
+- Ran the preregistered post-primary probes. A corrupted R2 receipt failed replay; the agent retracted and rediscovered only R2, preserved R1/R3, and passed. Deleting R2 likewise caused exactly one DLog search before passing.
+- Interpretation fixed as a protocol-transfer success but a null/contrary result for the graph-format interaction in this construction pilot. No run was replaced.
+
+Receipt: `2x2-results.md`, `2x2-result-hypothesis-graph.md`, `runs/2x2/`, and the next commit.
