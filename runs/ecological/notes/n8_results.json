@@ -1,0 +1,16 @@
+{
+  "seedless_band_tuples": [
+    [
+      1,
+      4,
+      5,
+      6,
+      7,
+      11,
+      13,
+      16
+    ]
+  ],
+  "band_count": 7,
+  "primitive_checked": 125925
+}

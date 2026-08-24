@@ -1,0 +1,85 @@
+{
+  "bounds": {
+    "max_height": 20,
+    "max_n": 7,
+    "min_n": 3
+  },
+  "per_n": {
+    "3": {
+      "band_tuples": 5,
+      "band_tuples_with_seed_certificate": 5,
+      "band_tuples_without_seed_certificate": 0,
+      "first_band_tuple": [
+        1,
+        2,
+        3
+      ],
+      "first_seedless_band_tuple": null,
+      "primitive_tuples": 997,
+      "total_increasing_tuples": 1140
+    },
+    "4": {
+      "band_tuples": 6,
+      "band_tuples_with_seed_certificate": 6,
+      "band_tuples_without_seed_certificate": 0,
+      "first_band_tuple": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "first_seedless_band_tuple": null,
+      "primitive_tuples": 4619,
+      "total_increasing_tuples": 4845
+    },
+    "5": {
+      "band_tuples": 8,
+      "band_tuples_with_seed_certificate": 8,
+      "band_tuples_without_seed_certificate": 0,
+      "first_band_tuple": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "first_seedless_band_tuple": null,
+      "primitive_tuples": 15246,
+      "total_increasing_tuples": 15504
+    },
+    "6": {
+      "band_tuples": 9,
+      "band_tuples_with_seed_certificate": 9,
+      "band_tuples_without_seed_certificate": 0,
+      "first_band_tuple": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "first_seedless_band_tuple": null,
+      "primitive_tuples": 38549,
+      "total_increasing_tuples": 38760
+    },
+    "7": {
+      "band_tuples": 13,
+      "band_tuples_with_seed_certificate": 13,
+      "band_tuples_without_seed_certificate": 0,
+      "first_band_tuple": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "first_seedless_band_tuple": null,
+      "primitive_tuples": 77400,
+      "total_increasing_tuples": 77520
+    }
+  },
+  "seedless_band_tuples": []
+}
