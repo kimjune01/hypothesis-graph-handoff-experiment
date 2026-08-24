@@ -1,0 +1,1 @@
+Transform the supplied Agent A transcript into the schema-provided structured handoff. Populate all seven sections. Each claim object must contain one atomic factual claim and every transcript event that directly supports it. Preserve failed trials and uncertainty. Do not add evidence absent from the transcript.

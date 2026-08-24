@@ -1,0 +1,38 @@
+{
+  "$defs": {
+    "fact": {
+      "type": "object",
+      "properties": {
+        "text": {"type": "string"},
+        "events": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^event-[0-9]+$"}}
+      },
+      "required": ["text", "events"],
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "claim": {"$ref": "#/$defs/fact"},
+          "reasoning_mode": {"$ref": "#/$defs/fact"},
+          "status": {"$ref": "#/$defs/fact"},
+          "dependency_parents": {"$ref": "#/$defs/fact"},
+          "kill_condition": {"$ref": "#/$defs/fact"},
+          "trial": {"$ref": "#/$defs/fact"},
+          "prediction": {"$ref": "#/$defs/fact"},
+          "outcome": {"$ref": "#/$defs/fact"}
+        },
+        "required": ["id", "claim", "reasoning_mode", "status", "dependency_parents", "kill_condition", "trial", "prediction", "outcome"],
+        "additionalProperties": false
+      }
+    },
+    "frontier": {"type": "array", "items": {"$ref": "#/$defs/fact"}}
+  },
+  "required": ["nodes", "frontier"],
+  "additionalProperties": false
+}

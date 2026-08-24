@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "properties": {
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "enum": ["Objective", "Current State", "Decisions", "Evidence", "Constraints", "Next Actions", "Open Questions"]},
+          "claims": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {"type": "string"},
+                "events": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^event-[0-9]+$"}}
+              },
+              "required": ["text", "events"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["name", "claims"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["sections"],
+  "additionalProperties": false
+}

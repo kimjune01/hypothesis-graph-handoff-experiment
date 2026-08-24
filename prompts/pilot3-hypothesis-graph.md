@@ -1,0 +1,1 @@
+Transform the supplied Agent A transcript into the schema-provided hypothesis graph. Preserve killed branches and the open frontier. Every fact object must contain one atomic factual claim and every transcript event that directly supports it. Do not add evidence absent from the transcript.
