@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 from math import gcd, prod
 from random import Random
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 
 @dataclass(frozen=True)
@@ -167,6 +167,43 @@ def independent_outputs(receipts: Sequence[DLogReceipt]) -> tuple[str, ...]:
         checksum(f"independent-{index}", receipt.residue)
         for index, receipt in enumerate(receipts, start=1)
     )
+
+
+def public_instances(bundle: DLogBundle) -> tuple[dict[str, int], ...]:
+    return tuple(
+        {
+            "modulus": instance.modulus,
+            "order": instance.order,
+            "generator": instance.generator,
+            "target": instance.target,
+        }
+        for instance in bundle.instances
+    )
+
+
+def grade_joint_submission(
+    bundle: DLogBundle, submission: Mapping[str, Any]
+) -> dict[str, Any]:
+    errors: list[str] = []
+    if submission.get("secret") != bundle.joint_secret:
+        errors.append("secret is incorrect")
+    expected_checksum = checksum("joint", bundle.joint_secret)
+    if submission.get("checksum") != expected_checksum:
+        errors.append("checksum is incorrect")
+    return {"passed": not errors, "errors": errors}
+
+
+def grade_independent_submission(
+    bundle: DLogBundle, submission: Mapping[str, Any]
+) -> dict[str, Any]:
+    errors: list[str] = []
+    expected_residues = [receipt.residue for receipt in bundle.receipts]
+    expected_checksums = list(independent_outputs(bundle.receipts))
+    if submission.get("residues") != expected_residues:
+        errors.append("residues are incorrect")
+    if submission.get("checksums") != expected_checksums:
+        errors.append("checksums are incorrect")
+    return {"passed": not errors, "errors": errors}
 
 
 def validate_bundle(bundle: DLogBundle) -> list[str]:

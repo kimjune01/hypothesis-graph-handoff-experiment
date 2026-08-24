@@ -7,8 +7,11 @@ from dlog_2x2 import (
     checksum,
     crt,
     generate_bundle,
+    grade_independent_submission,
+    grade_joint_submission,
     independent_outputs,
     joint_output,
+    public_instances,
     validate_bundle,
     verify_receipt,
 )
@@ -100,3 +103,37 @@ def test_joint_output_rejects_missing_or_invalid_receipts() -> None:
     )
     with pytest.raises(ValueError, match="invalid receipt"):
         joint_output(tuple(corrupted), bundle.instances)
+
+
+def test_public_instances_do_not_leak_answers() -> None:
+    bundle = generate_bundle(seed=8242026)
+    public = public_instances(bundle)
+    serialized = str(public)
+
+    assert str(bundle.joint_secret) not in serialized
+    for receipt in bundle.receipts:
+        assert str(receipt.residue) not in serialized
+    assert all(set(item) == {"modulus", "order", "generator", "target"} for item in public)
+
+
+def test_exact_submission_graders() -> None:
+    bundle = generate_bundle(seed=8242026)
+    joint = {
+        "secret": bundle.joint_secret,
+        "checksum": checksum("joint", bundle.joint_secret),
+    }
+    independent = {
+        "residues": [receipt.residue for receipt in bundle.receipts],
+        "checksums": list(independent_outputs(bundle.receipts)),
+    }
+
+    assert grade_joint_submission(bundle, joint) == {"passed": True, "errors": []}
+    assert grade_independent_submission(bundle, independent) == {
+        "passed": True,
+        "errors": [],
+    }
+
+    joint["secret"] += 1
+    independent["residues"][0] += 1
+    assert not grade_joint_submission(bundle, joint)["passed"]
+    assert not grade_independent_submission(bundle, independent)["passed"]

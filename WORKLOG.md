@@ -114,3 +114,12 @@ Receipt: commit `747b41a`; `ecological-ablation-results.md`; `ecological-result-
 - No instances have been generated and no outcome has been observed.
 
 Receipt: `2x2-task-selection.md` and the commit containing this entry.
+
+## 2026-08-24 — Prospective 2x2 construction begins
+
+- Fixed generator seed `8242026` before Agent A or Agent B outcomes.
+- Wrote failing tests first for deterministic generation, exact subgroup and receipt checks, CRT recovery, necessity of every joint checkpoint, independent-output separability, answer non-leakage, and exact graders.
+- Implemented the construction only after observing the expected missing-module and missing-function failures. All 20 repository tests pass.
+- Chose one shared set of three discrete-log instances for both task regimes. Agent A's discoveries can therefore be held fixed; only Agent B's downstream obligation changes.
+- Froze Agent A's public task and protocol prompt. The task withholds downstream use so Agent A cannot tailor checkpoint discovery to either experimental row.
+- No Agent A or Agent B outcome has yet been observed.
