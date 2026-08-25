@@ -1,0 +1,61 @@
+{
+  "retracted": [
+    "D12",
+    "E",
+    "N1"
+  ],
+  "preserved": [
+    "D23",
+    "N2",
+    "N3"
+  ],
+  "recomputed": [
+    "D12",
+    "E",
+    "N1"
+  ],
+  "receipts": {
+    "N1": {
+      "node": "N1",
+      "challenge": "a5430d5fc2c14c600c930d026938a3f06f3ed2d709baeefbf86af6a46b0899c4",
+      "difficulty_bits": 20,
+      "nonce": 1205509,
+      "digest": "00000a607fab9e45cb84784c958b87f67867b01649ca931dc2f608514fee43e0"
+    },
+    "N2": {
+      "node": "N2",
+      "challenge": "d9fca97abb3e8ed1f86107aaeae4fb397d760dbe93ab0af41ae7aad792d129dc",
+      "difficulty_bits": 20,
+      "nonce": 678483,
+      "digest": "00000f55eede454d6c6259182b3004f7d6afd4637d4732d217c22e8a8966dd40"
+    },
+    "N3": {
+      "node": "N3",
+      "challenge": "2bb6d1d0c7586fcf0f190cf7bb75710ab091ac8fba33a26911053e056f8a0f31",
+      "difficulty_bits": 20,
+      "nonce": 2876980,
+      "digest": "00000037aeabc6a5142ed81cfbf19f428588ad352600a030870c99960e8987cc"
+    },
+    "D12": {
+      "node": "D12",
+      "challenge": "25267e1736d0425facfd7f1b829945ebdcabb9432924290a1a872612f868f0a5",
+      "difficulty_bits": 20,
+      "nonce": 309229,
+      "digest": "000008e14bc1907b6419e5014200c399bbe96925aa686f7537f931ab5d58445c"
+    },
+    "D23": {
+      "node": "D23",
+      "challenge": "ccd75b49c00b2922de569e23a60a2a91242d365afd83475db60c1ef9d1d14a51",
+      "difficulty_bits": 20,
+      "nonce": 118958,
+      "digest": "00000269d55068d329270b73cec561f9d7ad101b42b9d5c73376071df18244e9"
+    },
+    "E": {
+      "node": "E",
+      "challenge": "5f4c76806c19d90308fea98a53d87c6b12d5737513e54907a2422ab00acc8bea",
+      "difficulty_bits": 20,
+      "nonce": 266526,
+      "digest": "000006da8e483416101a7a4e9f4b1899953e3dc3056dbcbd8ed1edea4b88557a"
+    }
+  }
+}

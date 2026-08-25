@@ -175,3 +175,15 @@ Receipt: `pow-recovery-design.md` and the next commit.
 - Notes are 178 words and Graph 133 words; length was recorded rather than equalized.
 
 Receipt: `pow-recovery-preregistration.md`, `artifacts/pow-recovery/`, `prompts/pow-agent-b.md`, Agent A files, and the next commit.
+
+## 2026-08-24 — Expensive-checkpoint recovery outcomes
+
+- Ran recovery in preregistered order: Notes, then Graph. Applied the exact hidden grader only after both completed.
+- Both passed with exact retraction `{N1,D12,E}`, preservation `{N2,N3,D23}`, recomputation `{N1,D12,E}`, and fully valid current bundles.
+- Each performed exactly 1,781,267 candidate hashes. A deterministic full rebuild would require 5,455,691, so selective recovery avoided 3,674,424 hashes (67.35%).
+- Notes finished in 64.542 seconds for $0.796555; Graph in 86.126 seconds for $0.848847. The representation comparison was null on correctness/work and unfavorable to Graph on observed time/cost.
+- No-corruption control passed: all six nodes preserved and zero rebuilt.
+- The unverifiable-attestation ablation failed before task work with organization-level HTTP 403. Preserved the failure and did not replace it; its outcome remains unobserved.
+- Interpretation: primary existence claim for selective recovery supported; Graph-over-Notes claim not supported.
+
+Receipt: `pow-recovery-results.md`, `pow-recovery-result-hypothesis-graph.md`, `runs/pow-recovery/`, and the next commit.

@@ -1,0 +1,56 @@
+{
+  "retracted": [],
+  "preserved": [
+    "D12",
+    "D23",
+    "E",
+    "N1",
+    "N2",
+    "N3"
+  ],
+  "recomputed": [],
+  "receipts": {
+    "N1": {
+      "node": "N1",
+      "challenge": "bcff9e59d4cba0fd5d5371db03045cfd859910002307844456091afd035beaff",
+      "difficulty_bits": 20,
+      "nonce": 1884136,
+      "digest": "00000b3b32378af750a60ba22a964295c90526936e37fc3ac00c7d41129d8421"
+    },
+    "N2": {
+      "node": "N2",
+      "challenge": "d9fca97abb3e8ed1f86107aaeae4fb397d760dbe93ab0af41ae7aad792d129dc",
+      "difficulty_bits": 20,
+      "nonce": 678483,
+      "digest": "00000f55eede454d6c6259182b3004f7d6afd4637d4732d217c22e8a8966dd40"
+    },
+    "N3": {
+      "node": "N3",
+      "challenge": "2bb6d1d0c7586fcf0f190cf7bb75710ab091ac8fba33a26911053e056f8a0f31",
+      "difficulty_bits": 20,
+      "nonce": 2876980,
+      "digest": "00000037aeabc6a5142ed81cfbf19f428588ad352600a030870c99960e8987cc"
+    },
+    "D12": {
+      "node": "D12",
+      "challenge": "e8e74b21d7131d188250857f90a9b313af9a36ee1001a340a6438f635c591e4f",
+      "difficulty_bits": 20,
+      "nonce": 385518,
+      "digest": "00000ec2c86cc7fc312b9a1112b4063765ac17729a6f9bf2dd496dca8edacd04"
+    },
+    "D23": {
+      "node": "D23",
+      "challenge": "ccd75b49c00b2922de569e23a60a2a91242d365afd83475db60c1ef9d1d14a51",
+      "difficulty_bits": 20,
+      "nonce": 118958,
+      "digest": "00000269d55068d329270b73cec561f9d7ad101b42b9d5c73376071df18244e9"
+    },
+    "E": {
+      "node": "E",
+      "challenge": "ed98cd06d84c3e61760fc7ad26b7a62a84e7441469a6a0d9c3cd68ac0d0cc23c",
+      "difficulty_bits": 20,
+      "nonce": 348439,
+      "digest": "00000f8bf9c1c7342760358b13b9d4f5dccf4ebbf1a42e2dbe9db61e46abf2f7"
+    }
+  }
+}
