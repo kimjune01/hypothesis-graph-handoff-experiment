@@ -341,3 +341,14 @@ Receipt: failed run output in the work log, mutation fix commit `6733cd4`, revis
 - No randomized repetitions, statistical estimates, or post-outcome changes were used.
 
 Receipt: `fail-closed-memory-results.md`, `fail-closed-memory-result-hypothesis-graph.md`, and the next commit.
+
+## 2026-08-24 — Unchanged fail-closed replication passed
+
+- Re-ran the frozen experiment without code, bound, schedule, or fixture changes.
+- Full suite: 62 passed in 1.68 seconds.
+- Exploration repeated exactly: 14,967 states, 39,288 transitions, 24,322 pruned, zero violations, no cap hit.
+- Conformance repeated exactly: 20 comparisons, zero mismatches.
+- All seven source mutants again executed and failed their selected assertion tests.
+- Recorded separately; no pooling, significance estimate, or broader claim added.
+
+Receipt: revised `fail-closed-memory-results.md` and the next commit.

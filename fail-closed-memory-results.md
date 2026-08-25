@@ -39,6 +39,8 @@ Confirmatory run 1 otherwise completed, but the version-entitlement source trans
 
 Follow-up 2 changed only that transform and the kill criterion: only an executed assertion failure counts. Scheduler, model, bounds, traces, races, and crash points were unchanged and frozen before rerun.
 
+An unchanged exact replication was run afterward at the user's request. It again passed 62 tests, explored the same 14,967 states and 39,288 transitions with zero violations, produced zero mismatches across 20 conformance comparisons, and killed all seven mutants by executed assertion failures. This replication is reported separately and is not treated as a statistical sample or pooled estimate.
+
 ## Supported claim
 
 > The declarative graph protocol preserved its fail-closed invariants over 14,967 completely explored bounded states. Scheduler commit `f88647b` matched a frozen ten-disposition conformance basis and preserved the declared invariants across six forced schedules, two pre-commit process deaths, and seven killed source mutants under the stated trusted boundary.
