@@ -236,6 +236,17 @@ Receipt: `concurrent-handoff-preregistration.md`, `prompts/concurrency-worker.md
 
 Receipt: `concurrent-handoff-results.md`, `concurrent-handoff-result-hypothesis-graph.md`, exported run databases/events/grades, and the next commit.
 
+## 2026-08-24 — Prospective concurrency follow-up correction
+
+- Began a new follow-up rather than replacing the failed three-frontier run.
+- Delegated the diagnosed correction to a Codex worker subagent with TDD and file ownership.
+- Added a configurable three-worker readiness barrier, distinct worker registration, one-live-claim-per-worker enforcement, pending-state polling, and immutable canonical packet capture.
+- Full suite passes with 37 tests.
+- Froze full Notes and oracle-curated A/B/C packets before the follow-up. Each packet is 554 canonical UTF-8 bytes and contains no open-node answer.
+- Froze the new run and exact common-overlap criterion before execution. No follow-up worker outcome has been observed.
+
+Receipt: harness commit `dfd013b`, `concurrent-followup-preregistration.md`, `artifacts/concurrent-followup/`, and the next commit.
+
 ## 2026-08-24 — Economy of search added prospectively
 
 - Clarified the user's intended term: Peircean uberty is expected fertility, or how much new knowledge a move may produce.
