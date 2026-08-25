@@ -56,7 +56,8 @@ class Scheduler:
               claim_token TEXT PRIMARY KEY, canonical_json TEXT NOT NULL, byte_count INTEGER NOT NULL);
             CREATE TABLE IF NOT EXISTS publications(
               claim_token TEXT PRIMARY KEY, node_id TEXT NOT NULL, node_version INTEGER NOT NULL,
-              parent_versions TEXT NOT NULL, receipt_digest TEXT NOT NULL,
+              parent_versions TEXT NOT NULL, claimed_work_digest TEXT NOT NULL,
+              receipt_digest TEXT NOT NULL,
               acceptance_seq INTEGER NOT NULL UNIQUE, result TEXT NOT NULL);
             CREATE TRIGGER IF NOT EXISTS packets_immutable_update
               BEFORE UPDATE ON packets BEGIN SELECT RAISE(ABORT, 'packets are immutable'); END;
@@ -278,9 +279,10 @@ class Scheduler:
                       "parent_versions": json.loads(claim["parent_versions"])}
             acceptance_seq = self._event(db, "accept", node["id"], detail)
             digest = hashlib.sha256(json.dumps(receipt, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-            db.execute("INSERT INTO publications VALUES(?,?,?,?,?,?,?)",
+            work_digest = hashlib.sha256(claim["claimed_work"].encode()).hexdigest()
+            db.execute("INSERT INTO publications VALUES(?,?,?,?,?,?,?,?)",
                        (token, node["id"], claim["node_version"], claim["parent_versions"],
-                        digest, acceptance_seq, json.dumps(result, sort_keys=True)))
+                        work_digest, digest, acceptance_seq, json.dumps(result, sort_keys=True)))
             if work["kind"] == "gate" and not receipt["verdict"]:
                 for child in db.execute("SELECT child FROM edges WHERE parent=?", (node["id"],)).fetchall():
                     db.execute("UPDATE nodes SET state='KILLED' WHERE id=?", (child["child"],)); self._event(db, "kill", child["child"])

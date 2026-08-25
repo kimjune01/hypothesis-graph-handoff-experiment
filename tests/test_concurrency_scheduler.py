@@ -229,6 +229,10 @@ def test_publication_is_immutable_and_records_entitlement(tmp_path):
         publication = db.execute("SELECT * FROM publications WHERE claim_token=?", (claim["claim_token"],)).fetchone()
         assert publication["node_version"] == claim["node_version"]
         assert json.loads(publication["parent_versions"]) == claim["parent_versions"]
+        expected_work_digest = __import__("hashlib").sha256(
+            json.dumps(claim["work"], sort_keys=True).encode()
+        ).hexdigest()
+        assert publication["claimed_work_digest"] == expected_work_digest
         assert json.loads(publication["result"]) == result
         with pytest.raises(Exception):
             db.execute("DELETE FROM publications WHERE claim_token=?", (claim["claim_token"],))
@@ -301,11 +305,13 @@ def test_authoritative_root_update_invalidates_only_reachable_nodes(tmp_path):
     with pytest.raises(ValueError):
         s.verify_root("R1", {"value": "silent-replacement"})
     before = s.node("B")
+    descendant_work = s.node("A")["work"]
     changed = s.update_root("R1", {"value": "one-v2"})
     assert changed == ["R1", "A"]
     assert s.node("R1")["state"] == "VERIFIED"
     assert s.node("A")["state"] == "OPEN"
     assert s.node("B")["state"] == before["state"]
     assert s.node("B")["version"] == before["version"]
+    assert s.node("A")["work"] == descendant_work
     with pytest.raises(ValueError):
         s.update_root("A", {"value": "forbidden"})
