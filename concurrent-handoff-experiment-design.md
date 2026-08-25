@@ -26,6 +26,8 @@ Edges: `R0→A`, `R0→B`, `R0→C`, `A→JAB`, `B→JAB`, `JAB→F`, `C→F`.
 
 Use calibrated deterministic proof-of-work certificates. Frontier discovery should take approximately 15–30 seconds single-core; joins 5–10 seconds. Verification is one hash. Freeze challenges, lowest-valid nonces, process/thread count, and calibration before agent runs. Workers invoke provided `discover` and `check` commands; they do not edit scheduler or verifier code.
 
+PoW gives controlled work and exact receipts, but it has almost no epistemic uberty: every nonce is known to exist and no hypothesis is genuinely at risk. It therefore tests concurrency and coordination only. Economy of search is tested through a separate set of cheap discriminating gates described below; do not infer search fertility from PoW completion.
+
 ## Executable scheduler semantics
 
 Node states are `BLOCKED`, `OPEN`, `CLAIMED`, `VERIFIED`, and `STALE`.
@@ -40,6 +42,37 @@ Node states are `BLOCKED`, `OPEN`, `CLAIMED`, `VERIFIED`, and `STALE`.
 Before agents run, tests must cover double-claim races, expired claims, duplicate publications, stale parent-version publications, exact transitive invalidation, unaffected-branch preservation, and deterministic reopening.
 
 The root may start workers and observe events, but must not manually assign substantive node context or relay dependency results. Workers claim and publish through the scheduler.
+
+## Economy-of-search scheduling
+
+Scheduling among simultaneously `OPEN` nodes follows Peirce's economy of research: buy the greatest expected decisive yield per unit cost first.
+
+For node `v`, freeze before outcomes:
+
+```text
+priority(v) = expected_decisive_yield(v) / expected_cost(v)
+```
+
+`expected_decisive_yield` is the preregistered expected amount of downstream work that the node's possible verdicts will either validly unlock or prune. It is not confidence, downstream node count alone, or a reward assigned after seeing the result. `expected_cost` includes predicted tool time, model tokens, and scarce worker occupancy. Scores, priors, estimates, and stable tie-breaking order are committed before runs; realized nonce counts or hidden answers may not influence priority.
+
+Add five cheap, exactly checked gate nodes `GA`–`GE`, all initially open and competing for three workers. Each gate tests a bounded proposition whose pass/fail verdict controls a substantially more expensive successor branch. At least one frozen gate fails and legitimately kills its branch; others unlock work with unequal downstream costs. Their outcomes remain hidden from workers but are fixed before scheduling.
+
+The scheduler must:
+
+1. claim the highest-priority open gates first;
+2. publish and propagate each verdict before assigning newly avoidable expensive work;
+3. never start a killed successor;
+4. recompute priorities only from changed public graph state, using the frozen scoring rule; and
+5. record the counterfactual cost of a fixed-order schedule from the same frozen node costs.
+
+Primary economy-of-search receipt:
+
+- every claimed node was maximal under the frozen priority rule at claim time;
+- all cheap discriminating gates completed before any lower-yield expensive node that they could prune;
+- the failed gate prevented its entire expensive branch from being claimed; and
+- exact avoided candidate hashes/tokens and scheduler regret versus the frozen fixed order are reported.
+
+This gate demonstration supports only that the scheduler executed a cost-and-uberty ordering and avoided known unnecessary work in this instance. It does not validate the prior yield estimates or establish that the scoring rule is generally optimal.
 
 ## Experiment A: safe concurrent entry
 
@@ -103,6 +136,7 @@ Measure propagation and cancellation latency, stale publication rejection, waste
 - stale publications accepted/rejected;
 - over/under-invalidation; and
 - wall time, critical path, model cost, CPU/process count, and setup cost.
+- frozen expected cost, expected decisive yield, priority score, realized decisive yield, avoided work, and scheduling regret.
 
 Use claim-to-first-tool-call and claim-to-valid-publication timestamps rather than subjective “first useful action” judgments.
 
@@ -125,7 +159,7 @@ It may not show general superiority over curated Notes, persistent speedup, asym
 ## Execution order
 
 1. Implement scheduler, client, generator, packet audit, and graders test-first.
-2. Calibrate work and freeze the instance.
+2. Calibrate work; freeze gate propositions, hidden outcomes, cost/yield estimates, priority scores, and the instance.
 3. Pass race and invalidation tests.
 4. Freeze serial, concurrent, packet, and invalidation protocols.
 5. Run serial oracle, then concurrent entry demonstration.

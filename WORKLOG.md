@@ -211,3 +211,15 @@ Receipt: `concurrent-handoff-experiment-design.md` and the next commit.
 - No implementation or outcome has been generated.
 
 Receipt: revised `concurrent-handoff-experiment-design.md` and the next commit.
+
+## 2026-08-24 — Economy of search added prospectively
+
+- Clarified the user's intended term: Peircean uberty is expected fertility, or how much new knowledge a move may produce.
+- Identified a construct-validity problem before implementation: deterministic PoW has controllable cost but nearly zero epistemic uberty because its successful result is guaranteed.
+- Kept PoW for the concurrency workload and added a separate five-gate discriminating frontier for the economy-of-search mechanism.
+- Fixed scheduler priority as preregistered expected decisive yield divided by expected total cost, applied only among currently open nodes with stable ties.
+- Required scores and priors to be frozen without hidden answers or realized nonce counts; required exact logging of avoided work and regret against a frozen fixed order.
+- Added a hidden failing gate whose cheap verdict must prevent an expensive successor subtree from ever being claimed.
+- No gate instance, score, or outcome has been generated.
+
+Receipt: revised `concurrent-handoff-experiment-design.md` and the next commit.
