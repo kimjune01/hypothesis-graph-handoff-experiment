@@ -270,6 +270,19 @@ Receipt: `concurrent-followup2-preregistration.md` and the next commit.
 
 Receipt: `concurrent-followup-results.md`, `concurrent-followup-result-hypothesis-graph.md`, Follow-up 2 database/events/packets/grade, and the next commit.
 
+## 2026-08-24 — Prospective fail-closed reliability experiment designed
+
+- Recentered the next evidence round on the load-bearing reliability claim rather than model capability or timing.
+- Used the engineering testing-strategy skill to separate deterministic transitions, bounded model exploration, stateful property testing, and crash/concurrency integration.
+- Declared twelve safety invariants, a conditional liveness property, included worker/scheduling faults, and the trusted computing base excluded from the claim.
+- Required an independent pure reference model compared with the SQLite implementation after every generated action.
+- Added a bounded exhaustive diamond-graph exploration and a frozen 10,000-example, 200-step stateful confirmatory run.
+- Added nine deliberately broken mutants; every mutant must be killed for the suite to demonstrate sensitivity.
+- Defined the only permitted strong conclusion in terms of version, explored states/interleavings, crash suite, mutants, and declared fault boundary.
+- No new fault-testing outcome has been generated.
+
+Receipt: `fail-closed-memory-experiment-design.md` and the next commit.
+
 ## 2026-08-24 — Economy of search added prospectively
 
 - Clarified the user's intended term: Peircean uberty is expected fertility, or how much new knowledge a move may produce.
