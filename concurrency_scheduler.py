@@ -43,15 +43,27 @@ class Scheduler:
             CREATE TABLE IF NOT EXISTS events(
               seq INTEGER PRIMARY KEY AUTOINCREMENT, at REAL NOT NULL, kind TEXT NOT NULL,
               node_id TEXT, detail TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS config(
+              run_id TEXT PRIMARY KEY, barrier_target INTEGER NOT NULL);
+            CREATE TABLE IF NOT EXISTS workers(
+              run_id TEXT NOT NULL, worker TEXT NOT NULL, eligible INTEGER NOT NULL DEFAULT 0,
+              registered_at REAL NOT NULL, PRIMARY KEY(run_id, worker));
+            CREATE TABLE IF NOT EXISTS packets(
+              claim_token TEXT PRIMARY KEY, canonical_json TEXT NOT NULL, byte_count INTEGER NOT NULL);
+            CREATE TRIGGER IF NOT EXISTS packets_immutable_update
+              BEFORE UPDATE ON packets BEGIN SELECT RAISE(ABORT, 'packets are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS packets_immutable_delete
+              BEFORE DELETE ON packets BEGIN SELECT RAISE(ABORT, 'packets are immutable'); END;
             """)
 
-    def install_frozen_dag(self, difficulty=4):
+    def install_frozen_dag(self, difficulty=4, barrier_target=1, run_id="run"):
         gates = [("GD", 21, 100, 1), ("GA", 23, 90, 2), ("GB", 29, 80, 3),
                  ("GC", 31, 70, 4), ("GE", 37, 60, 5)]
         workloads = ["A", "B", "C", "D", "X", "JAB", "F"]
         with self._db() as db:
             db.execute("BEGIN IMMEDIATE")
             db.execute("DELETE FROM events"); db.execute("DELETE FROM claims")
+            db.execute("DELETE FROM workers"); db.execute("DELETE FROM config")
             db.execute("DELETE FROM edges"); db.execute("DELETE FROM nodes")
             self._insert(db, "R0", "STALE", {"kind": "root", "node_id": "R0"}, 0, 0, 0)
             for name, n, yld, tie in gates:
@@ -63,6 +75,7 @@ class Scheduler:
                     ("GD", "D"), ("GE", "X"), ("A", "JAB"), ("B", "JAB"),
                     ("JAB", "F"), ("C", "F"), ("X", "F")]
             db.executemany("INSERT INTO edges VALUES(?,?)", edges)
+            db.execute("INSERT INTO config(run_id,barrier_target) VALUES(?,?)", (run_id, barrier_target))
             db.commit()
 
     def _insert(self, db, nid, state, work, cost, yld, tie):
@@ -97,11 +110,68 @@ class Scheduler:
                     db.execute("UPDATE nodes SET state='KILLED' WHERE id=?", (row["id"],))
                     self._event(db, "kill", row["id"]); changed = True
 
+    def _gates_complete(self, db):
+        remaining = db.execute(
+            "SELECT 1 FROM nodes WHERE json_extract(work,'$.kind')='gate' "
+            "AND state NOT IN ('VERIFIED','KILLED') LIMIT 1"
+        ).fetchone()
+        return remaining is None
+
+    def register(self, worker, run_id="run"):
+        """Register a distinct worker as ready for the post-gate frontier."""
+        with self._db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            eligible = int(self._gates_complete(db))
+            db.execute(
+                "INSERT INTO workers(run_id,worker,eligible,registered_at) VALUES(?,?,?,?) "
+                "ON CONFLICT(run_id,worker) DO UPDATE SET eligible=max(eligible,excluded.eligible)",
+                (run_id, worker, eligible, time.time()),
+            )
+            db.commit()
+
+    def _register_in_tx(self, db, worker, run_id):
+        eligible = int(self._gates_complete(db))
+        db.execute(
+            "INSERT INTO workers(run_id,worker,eligible,registered_at) VALUES(?,?,?,?) "
+            "ON CONFLICT(run_id,worker) DO UPDATE SET eligible=max(eligible,excluded.eligible)",
+            (run_id, worker, eligible, time.time()),
+        )
+
+    def _barrier_ready(self, db, run_id):
+        cfg = db.execute("SELECT barrier_target FROM config WHERE run_id=?", (run_id,)).fetchone()
+        target = cfg["barrier_target"] if cfg else 1
+        count = db.execute("SELECT count(*) n FROM workers WHERE run_id=? AND eligible=1", (run_id,)).fetchone()["n"]
+        return count >= target
+
+    def _semantic_packet(self, row, parents):
+        prerequisites = {
+            p["id"]: {"version": p["version"], "receipt": json.loads(p["receipt"])}
+            for p in parents
+        }
+        return {
+            "objective": {"node_id": row["id"], "claim": "Produce the contracted receipt for this node."},
+            "work": json.loads(row["work"]),
+            "prerequisites": prerequisites,
+            "checks": {"procedure": "check_receipt(work, receipt) must return true"},
+            "kill_condition": "Reject publication if its receipt fails or any prerequisite version changes.",
+            "output_contract": "Return one exact receipt to publish().",
+        }
+
     def claim(self, worker, run_id="run"):
         with self._db() as db:
             db.execute("BEGIN IMMEDIATE")
+            self._register_in_tx(db, worker, run_id)
+            live = db.execute(
+                "SELECT 1 FROM claims WHERE worker=? AND run_id=? AND status='LIVE' LIMIT 1",
+                (worker, run_id),
+            ).fetchone()
+            if live:
+                db.commit(); return None
             row = db.execute("SELECT * FROM nodes WHERE state='OPEN' ORDER BY expected_yield/expected_cost DESC,tie_order,id LIMIT 1").fetchone()
             if not row:
+                db.commit(); return None
+            work = json.loads(row["work"])
+            if work["kind"] != "gate" and not self._barrier_ready(db, run_id):
                 db.commit(); return None
             token = uuid.uuid4().hex
             parents = self._parents(db, row["id"])
@@ -112,10 +182,31 @@ class Scheduler:
             db.execute("INSERT INTO claims(token,node_id,worker,run_id,lease_until,parent_versions,status) VALUES(?,?,?,?,?,?,?)",
                        (token, row["id"], worker, run_id, time.time()+self.lease_seconds, json.dumps(pv, sort_keys=True), "LIVE"))
             self._event(db, "claim", row["id"], {"worker": worker, "token": token, "priority": row["expected_yield"]/row["expected_cost"]})
+            semantic = self._semantic_packet(row, parents)
+            canonical = json.dumps(semantic, sort_keys=True, separators=(",", ":"))
+            db.execute("INSERT INTO packets VALUES(?,?,?)", (token, canonical, len(canonical.encode())))
             packet = {"node_id": row["id"], "claim_token": token, "lease_until": time.time()+self.lease_seconds,
-                      "parent_versions": pv, "prerequisites": {p["id"]: json.loads(p["receipt"]) for p in parents},
-                      "work": json.loads(row["work"]), "output_contract": "Return one exact receipt to publish()."}
+                      "worker": worker, "parent_versions": pv,
+                      "prerequisites": {p["id"]: json.loads(p["receipt"]) for p in parents},
+                      "work": work, "output_contract": "Return one exact receipt to publish()."}
             db.commit(); return packet
+
+    def packet(self, token):
+        with self._db() as db:
+            row = db.execute("SELECT * FROM packets WHERE claim_token=?", (token,)).fetchone()
+            if not row:
+                return None
+            return {"canonical_json": row["canonical_json"], "byte_count": row["byte_count"],
+                    "packet": json.loads(row["canonical_json"])}
+
+    def run_state(self):
+        with self._db() as db:
+            final = db.execute("SELECT state FROM nodes WHERE id='F'").fetchone()
+            if final and final["state"] == "VERIFIED":
+                return "COMPLETE"
+            if final and final["state"] == "KILLED":
+                return "TERMINAL"
+            return "PENDING"
 
     def publish(self, token, receipt):
         with self._db() as db:

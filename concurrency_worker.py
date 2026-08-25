@@ -2,15 +2,23 @@
 
 import argparse
 import json
+import time
 
 from concurrency_scheduler import Scheduler, StalePublication
 from concurrency_work import discover
 
 
-def run(db, worker, once=False):
+def run(db, worker, once=False, poll_seconds=0.05):
     scheduler = Scheduler(db)
     completed = []
-    while claim := scheduler.claim(worker):
+    scheduler.register(worker)
+    while True:
+        claim = scheduler.claim(worker)
+        if not claim:
+            if once or scheduler.run_state() in ("COMPLETE", "TERMINAL"):
+                break
+            time.sleep(poll_seconds)
+            continue
         def progress(units):
             scheduler.progress(claim["claim_token"], units)
         receipt = discover(claim["work"], progress)

@@ -1,11 +1,13 @@
 import json
 import threading
+import time
 from pathlib import Path
 
 import pytest
 
 from concurrency_scheduler import Scheduler, StalePublication
 from concurrency_work import check_receipt, discover
+from concurrency_worker import run
 
 
 def scheduler(tmp_path: Path) -> Scheduler:
@@ -122,3 +124,79 @@ def test_work_receipts_are_exact():
     receipt = discover(work)
     assert check_receipt(work, receipt)
     assert not check_receipt(work, {**receipt, "nonce": receipt["nonce"] + 1})
+
+
+def finish_gates(s):
+    for gate in ("GD", "GA", "GB", "GC", "GE"):
+        solve_and_publish(s, "gate-worker", gate)
+
+
+def test_readiness_barrier_blocks_until_three_distinct_workers(tmp_path):
+    s = Scheduler(tmp_path / "barrier.db")
+    s.install_frozen_dag(difficulty=1, barrier_target=3)
+    s.verify_root("R0", {"value": "root"})
+    finish_gates(s)
+    s.register("w1")
+    assert s.claim("w1") is None
+    s.register("w2")
+    assert s.claim("w2") is None
+    s.register("w3")
+    assert s.claim("w3")["node_id"] == "A"
+
+
+def test_three_workers_receive_distinct_frontier_claims(tmp_path):
+    s = Scheduler(tmp_path / "frontier.db")
+    s.install_frozen_dag(difficulty=1, barrier_target=3)
+    s.verify_root("R0", {"value": "root"})
+    finish_gates(s)
+    for worker in ("w1", "w2", "w3"):
+        s.register(worker)
+    barrier = threading.Barrier(3)
+    claims = {}
+
+    def race(worker):
+        barrier.wait()
+        claims[worker] = s.claim(worker)
+
+    threads = [threading.Thread(target=race, args=(w,)) for w in ("w1", "w2", "w3")]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    assert {c["node_id"] for c in claims.values()} == {"A", "B", "C"}
+    assert len({c["worker"] for c in claims.values()}) == 3
+
+
+def test_semantic_packet_is_canonical_immutable_and_bounded(tmp_path):
+    s = scheduler(tmp_path)
+    finish_gates(s)
+    for node in ("A", "B", "C", "X"):
+        solve_and_publish(s, "w", node)
+    claim = s.claim("joiner")
+    captured = s.packet(claim["claim_token"])
+    semantic = captured["packet"]
+    assert captured["byte_count"] == len(captured["canonical_json"].encode())
+    assert captured["byte_count"] < 2_048
+    assert captured["canonical_json"] == json.dumps(semantic, sort_keys=True, separators=(",", ":"))
+    assert set(semantic["prerequisites"]) == {"A", "B"}
+    assert {"objective", "work", "prerequisites", "checks", "kill_condition", "output_contract"} <= set(semantic)
+    assert "claim_token" not in captured["canonical_json"] and "lease" not in captured["canonical_json"]
+    assert "answer" not in captured["canonical_json"].lower()
+    with s._db() as db:
+        with pytest.raises(Exception):
+            db.execute("UPDATE packets SET canonical_json='{}' WHERE claim_token=?", (claim["claim_token"],))
+
+
+def test_worker_polls_pending_barrier_and_exits_at_terminal(tmp_path):
+    s = Scheduler(tmp_path / "poll.db")
+    s.install_frozen_dag(difficulty=1, barrier_target=3)
+    s.verify_root("R0", {"value": "root"})
+    finish_gates(s)
+    finished = []
+    thread = threading.Thread(target=lambda: finished.extend(run(s.path, "w1", poll_seconds=.01)))
+    thread.start()
+    time.sleep(.05)
+    assert thread.is_alive()
+    s.register("w2"); s.register("w3")
+    thread.join(5)
+    assert not thread.is_alive()
+    # Other workers may finish the now-released graph; terminal means F verified.
+    assert s.node("F")["state"] == "VERIFIED"
