@@ -4,7 +4,7 @@ Status: revised prospectively after independent subagent audit; not yet implemen
 
 ## Claim under test
 
-> This scheduler version preserves declared replay, version, publication, and selective-invalidation safety invariants over a frozen bounded state space, race schedules, crash points, and fault mutants.
+> The declarative graph protocol is fail-closed over its frozen bounded state space, and scheduler commit `f88647bb5bcf0647c7d94f5ec702d5816841ce67` conforms on a transition/disposition-complete basis while preserving the same declared invariants under the frozen SQLite races, crash points, and fault mutants.
 
 “Fail-closed” means unsupported or stale results cannot enter verified memory or unlock downstream work. Refusing progress is safe. Liveness is evaluated separately and is not required for this safety claim.
 
@@ -53,7 +53,7 @@ Freeze a projection used to compare a pure reference model with SQLite after eve
 
 Exclude random UUID spelling, wall-clock timestamps, SQLite row IDs, JSON whitespace, and other incidental representation. Freeze the equivalence relation before execution.
 
-The reference model is derived from a declarative transition table, not translated line-by-line from scheduler code. Invariant checks are implemented separately from both systems.
+The reference model is derived from a declarative transition table, not translated line-by-line from scheduler code. Invariant checks are implemented separately from both systems. Complete bounded exploration validates the protocol specification; it is not represented as complete exploration of SQLite. Scheduler correspondence is tested separately by the frozen conformance basis below.
 
 ## Load-bearing safety invariants
 
@@ -67,7 +67,7 @@ Check after every transition:
 6. **Claim exclusivity:** at most one live claim exists per node-version and per worker-run pair.
 7. **Exact invalidation:** a root update invalidates every reachable descendant and no unreachable node.
 8. **Independent preservation:** unreachable verified nodes retain state, version, and receipt byte-for-byte.
-9. **Atomic publication:** claim acceptance, node verification, publication record, and unlock event are all committed or none are.
+9. **Atomic publication:** claim acceptance, node verification, publication record, and all resulting state/event changes are committed or none are.
 10. **Fail-closed rejection:** every rejected or interrupted action leaves invariants 1–9 true.
 
 Audit-record immutability is a separate storage-integrity property unless the revised implementation enforces it explicitly. Priority order is excluded; it is scheduling policy, not fail-closed memory.
@@ -95,48 +95,35 @@ Test every permitted transition and rejection path individually, including histo
 
 Use logical time and deterministic tokens on the frozen diamond DAG `R→A,B; A,B→J` with two workers.
 
-Before execution freeze:
-
-- exact initial state and versions;
-- complete action alphabet and preconditions;
-- exact maximum depth;
-- maximum unique-state cap;
-- state canonicalization and equivalence relation; and
-- invariant checker hash.
+Frozen settings: `initial_diamond(lease_ticks=2)`, two workers, the action alphabet implemented by `_actions`, maximum depth 6, and 20,000 unique states. State canonicalization is `project()`. The model hash is `9a149be6d7ad4f2189980339cb1781f1948e5c1c40e085c6fe2c8a96b76088d3`; explorer hash is `af978deba57a5dfbde127940f056564f099fa8ca7654b6c9e9171742c8d121eb`.
 
 Enumerate every enabled action/fault to the frozen depth, deduplicating equivalent projected states. Report states, transitions, equivalent states pruned, maximum depth reached, and counterexamples.
 
 Hitting the state cap is an inconclusive/failing layer, never a pass. “Exhaustive” always means only within the frozen DAG, alphabet, and depth.
 
-### 3. Frozen real races
+### 3. Frozen model–SQLite conformance basis
 
-Against SQLite WAL mode, use barriers to run:
+Run the two deterministic traces in `fail_closed_conformance.py`: 18 public actions, 20 comparisons after actions and initial states, and exactly these ten dispositions: claimed, not-claimable, unknown-token, invalid-receipt, accepted, current replay, expired, cancelled, root-updated, and superseded replay. Any projected-state mismatch fails. Conformance adapter hash: `b54bacc3d1ff16a787fbd0baf558a906842524680ff4d736766f04431c32fbaf`.
 
-- double claim;
-- publish versus root invalidation; and
-- lease expiry versus publication.
+### 4. Frozen real races
 
-Freeze repetitions and process/thread counts. Assert exact permitted outcomes and invariants after every race. These tests cover real concurrency that the serialized state model does not.
+Against SQLite WAL mode, run each exact forced schedule once:
 
-### 4. Pre-commit crash failpoints
+- same-node double claim with a two-thread barrier;
+- publish-before-root-update and root-update-before-publish; and
+- publication immediately before, exactly at, and immediately after lease expiry.
 
-Add test-only process failpoints after individual publication/invalidation writes but before commit. Terminate a subprocess at each frozen failpoint, reopen SQLite, and require either the complete transition or the complete pre-transition state—never a partial publication or invalidation.
+These exact linearizations replace noisy repetition. Assert the permitted outcome and invariants after every schedule. Adversarial test hash: `9bd94e0e94c7a42709b6b7cbfd6d5265e5be0e53b405d140edc29abcb6003316`.
+
+### 5. Pre-commit crash failpoints
+
+Terminate a subprocess at exactly two frozen failpoints: `publication_after_node_write` and `invalidation_after_first_node_write`. Reopen SQLite and require the complete pre-transition state, never a partial publication or invalidation.
 
 Transaction-boundary termination alone is insufficient evidence.
 
-### 5. Exact mutation sensitivity
+### 6. Exact mutation sensitivity
 
-Freeze isolated test-only patches and the invariant expected to kill each:
-
-1. remove receipt validation;
-2. omit parent-version comparison;
-3. split claim/publication writes outside one transaction;
-4. accept an expired token;
-5. under-invalidate one descendant;
-6. over-invalidate an independent branch;
-7. return accepted-token replay after invalidation as current entitlement;
-8. validate a receipt against stale rather than claimed-version work; and
-9. partially commit invalidation.
+Run the seven exact isolated source transformations in `fail_closed_mutations.py`: receipt bypass, node/parent-version entitlement bypass, expired-token acceptance, claim-exclusivity loss, under-invalidation, over-invalidation, and split publication transaction. Runner hash: `4c484e15c1a7dd5d434c6de8ff7d36493d940f7c0fe5613c432f2e521af23ac7`.
 
 Every mutant must be killed. A surviving mutant is a coverage failure even if the unmodified scheduler passes.
 
@@ -149,7 +136,7 @@ randomized trials merely to increase a sample count. The confirmatory evidence i
 - one deterministic test for each distinct transition or rejection rule;
 - the three races above, repeated only enough to exercise both permitted orderings;
 - only pre-commit failpoints that separate writes within the publication or invalidation transaction; and
-- one mutant for each distinct load-bearing invariant that is not already the direct subject of another mutant.
+- the seven frozen mutants above.
 
 Generated-DAG property testing is explicitly deferred. It may broaden robustness later, but it
 does not carry the present conclusion. Expand the suite only when a new case exposes a distinct
@@ -174,7 +161,7 @@ Any invariant violation fails this scheduler version. A fix requires a separatel
 
 ## Permitted conclusion
 
-> Scheduler version X preserved the declared safety invariants over Y completely explored bounded states, Z frozen race schedules, C pre-commit crash points, and all M declared mutants under a trusted checker, scheduler process, SQLite engine, operating system, clock, and storage root.
+> The declarative graph protocol preserved its declared invariants over Y completely explored bounded states. Scheduler commit `f88647b` matched the frozen conformance basis and preserved those invariants across six forced race/boundary schedules, two pre-commit process deaths, and all seven declared mutants under a trusted checker, scheduler process, SQLite engine, operating system, clock, and storage root.
 
 Even after a pass, do not claim that hypothesis graphs are generally safe, Byzantine-fault tolerant, semantically correct, durable under storage rollback, or automatically confer these guarantees on arbitrary applications.
 

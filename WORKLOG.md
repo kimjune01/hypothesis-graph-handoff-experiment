@@ -306,3 +306,15 @@ Receipt: revised `fail-closed-memory-experiment-design.md` and the next commit.
 - No gate instance, score, or outcome has been generated.
 
 Receipt: revised `concurrent-handoff-experiment-design.md` and the next commit.
+
+## 2026-08-24 — Economical fail-closed implementation piloted
+
+- Implemented versioned claims, immutable publication evidence, historical replay semantics, deterministic clocks/tokens, strict root authority, and frozen claimed-work checking.
+- Built an independent declarative diamond model. Development exploration completed depth 6 in 14,967 states; depth 8 deliberately hit its cap and was treated as inconclusive.
+- An independent audit found three validity gaps: no model/SQLite correspondence layer, disagreement exactly at lease expiry, and inconsistent work-digest semantics.
+- Fixed expiry to occur at `now >= lease_until`, kept unchanged descendant work digests stable across root updates, and added two canonical conformance traces covering ten API dispositions.
+- Added exact forced schedules, two subprocess crash failpoints, and seven isolated source mutants. Development suite passes and all mutants are killed.
+- Removed randomized significance-style trials. This is a bounded mechanism demonstration; additional repetition is allowed only for a distinct failure mode.
+- Froze commit, hashes, depth, cap, schedules, crash points, and mutants before the confirmatory run. Development outcomes are not reported as confirmatory outcomes.
+
+Receipt: `fail-closed-memory-experiment-design.md`, implementation commit `f88647b`, and the next preregistration commit.
