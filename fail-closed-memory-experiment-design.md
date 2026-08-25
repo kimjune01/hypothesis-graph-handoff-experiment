@@ -140,19 +140,20 @@ Freeze isolated test-only patches and the invariant expected to kill each:
 
 Every mutant must be killed. A surviving mutant is a coverage failure even if the unmodified scheduler passes.
 
-## Supplementary robustness evidence
+## Cost boundary
 
-After the load-bearing layers pass, run stateful property testing over generated DAGs:
+This is a bounded mechanism demonstration, not general scheduler certification. Do not add
+randomized trials merely to increase a sample count. The confirmatory evidence is limited to:
 
-- 1,000 examples;
-- 75 steps maximum;
-- 2–8 workers and 4–25 nodes;
-- logical clock and deterministic confirmatory seed;
-- biased generation around expiry, invalidation, response loss, and shared descendants;
-- deadline disabled; and
-- persisted minimized counterexamples.
+- one tiny diamond graph explored completely to its frozen depth;
+- one deterministic test for each distinct transition or rejection rule;
+- the three races above, repeated only enough to exercise both permitted orderings;
+- only pre-commit failpoints that separate writes within the publication or invalidation transaction; and
+- one mutant for each distinct load-bearing invariant that is not already the direct subject of another mutant.
 
-Report transition and transition-pair coverage. Do not call generated serial API sequences real concurrency interleavings. This layer broadens robustness evidence but does not carry the core claim.
+Generated-DAG property testing is explicitly deferred. It may broaden robustness later, but it
+does not carry the present conclusion. Expand the suite only when a new case exposes a distinct
+failure mode or trusted-boundary assumption.
 
 ## Separate liveness result
 
@@ -184,5 +185,5 @@ Even after a pass, do not claim that hypothesis graphs are generally safe, Byzan
 3. Commit and push the preregistration before confirmatory outcomes.
 4. Run deterministic and bounded-exploration layers.
 5. Run races, crashes, and mutants.
-6. Run supplementary property and separate liveness suites.
+6. Run the separate liveness suite.
 7. Publish every trace, state count, mutation result, and work-log decision.
