@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import sqlite3
 import time
 import uuid
@@ -16,9 +17,11 @@ class StalePublication(RuntimeError):
 
 
 class Scheduler:
-    def __init__(self, path: str | Path, lease_seconds: float = 60):
+    def __init__(self, path: str | Path, lease_seconds: float = 60, *, clock=None, token_source=None):
         self.path = str(path)
         self.lease_seconds = lease_seconds
+        self._clock = clock or time.time
+        self._token_source = token_source or (lambda: uuid.uuid4().hex)
         self._init()
 
     def _db(self):
@@ -38,7 +41,8 @@ class Scheduler:
             CREATE TABLE IF NOT EXISTS edges(parent TEXT, child TEXT, PRIMARY KEY(parent, child));
             CREATE TABLE IF NOT EXISTS claims(
               token TEXT PRIMARY KEY, node_id TEXT NOT NULL, worker TEXT NOT NULL, run_id TEXT NOT NULL,
-              lease_until REAL NOT NULL, parent_versions TEXT NOT NULL, status TEXT NOT NULL,
+              lease_until REAL NOT NULL, node_version INTEGER NOT NULL,
+              parent_versions TEXT NOT NULL, claimed_work TEXT NOT NULL, status TEXT NOT NULL,
               progress INTEGER NOT NULL DEFAULT 0, result TEXT);
             CREATE TABLE IF NOT EXISTS events(
               seq INTEGER PRIMARY KEY AUTOINCREMENT, at REAL NOT NULL, kind TEXT NOT NULL,
@@ -50,30 +54,59 @@ class Scheduler:
               registered_at REAL NOT NULL, PRIMARY KEY(run_id, worker));
             CREATE TABLE IF NOT EXISTS packets(
               claim_token TEXT PRIMARY KEY, canonical_json TEXT NOT NULL, byte_count INTEGER NOT NULL);
+            CREATE TABLE IF NOT EXISTS publications(
+              claim_token TEXT PRIMARY KEY, node_id TEXT NOT NULL, node_version INTEGER NOT NULL,
+              parent_versions TEXT NOT NULL, receipt_digest TEXT NOT NULL,
+              acceptance_seq INTEGER NOT NULL UNIQUE, result TEXT NOT NULL);
             CREATE TRIGGER IF NOT EXISTS packets_immutable_update
               BEFORE UPDATE ON packets BEGIN SELECT RAISE(ABORT, 'packets are immutable'); END;
             CREATE TRIGGER IF NOT EXISTS packets_immutable_delete
               BEFORE DELETE ON packets BEGIN SELECT RAISE(ABORT, 'packets are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS publications_immutable_update
+              BEFORE UPDATE ON publications BEGIN SELECT RAISE(ABORT, 'publications are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS publications_immutable_delete
+              BEFORE DELETE ON publications BEGIN SELECT RAISE(ABORT, 'publications are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS events_immutable_update
+              BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT, 'events are immutable'); END;
+            CREATE TRIGGER IF NOT EXISTS events_immutable_delete
+              BEFORE DELETE ON events BEGIN SELECT RAISE(ABORT, 'events are immutable'); END;
             """)
 
     def install_frozen_dag(self, difficulty=4, barrier_target=1, run_id="run"):
         gates = [("GD", 21, 100, 1), ("GA", 23, 90, 2), ("GB", 29, 80, 3),
                  ("GC", 31, 70, 4), ("GE", 37, 60, 5)]
         workloads = ["A", "B", "C", "D", "X", "JAB", "F"]
+        nodes = [{"id": "R0", "state": "STALE", "work": {"kind": "root", "node_id": "R0"},
+                  "expected_cost": 0, "expected_yield": 0, "tie_order": 0}]
+        nodes += [{"id": name, "state": "BLOCKED", "work": {"kind": "gate", "node_id": name, "n": n},
+                   "expected_cost": 1, "expected_yield": yld, "tie_order": tie}
+                  for name, n, yld, tie in gates]
+        nodes += [{"id": name, "state": "BLOCKED",
+                   "work": {"kind": "pow", "node_id": name, "challenge": f"frozen:{name}", "difficulty": difficulty},
+                   "expected_cost": 100, "expected_yield": 1, "tie_order": i}
+                  for i, name in enumerate(workloads, 20)]
+        edges = [("R0", g[0]) for g in gates] + [("GA", "A"), ("GB", "B"), ("GC", "C"),
+                ("GD", "D"), ("GE", "X"), ("A", "JAB"), ("B", "JAB"),
+                ("JAB", "F"), ("C", "F"), ("X", "F")]
+        self.install_dag(nodes, edges, barrier_target=barrier_target, run_id=run_id)
+
+    def install_dag(self, nodes, edges, *, barrier_target=1, run_id="run"):
+        """Install one declarative DAG into a fresh scheduler database."""
         with self._db() as db:
             db.execute("BEGIN IMMEDIATE")
-            db.execute("DELETE FROM events"); db.execute("DELETE FROM claims")
-            db.execute("DELETE FROM workers"); db.execute("DELETE FROM config")
-            db.execute("DELETE FROM edges"); db.execute("DELETE FROM nodes")
-            self._insert(db, "R0", "STALE", {"kind": "root", "node_id": "R0"}, 0, 0, 0)
-            for name, n, yld, tie in gates:
-                self._insert(db, name, "BLOCKED", {"kind": "gate", "node_id": name, "n": n}, 1, yld, tie)
-            for i, name in enumerate(workloads, 20):
-                work = {"kind": "pow", "node_id": name, "challenge": f"frozen:{name}", "difficulty": difficulty}
-                self._insert(db, name, "BLOCKED", work, 100, 1, i)
-            edges = [("R0", g[0]) for g in gates] + [("GA", "A"), ("GB", "B"), ("GC", "C"),
-                    ("GD", "D"), ("GE", "X"), ("A", "JAB"), ("B", "JAB"),
-                    ("JAB", "F"), ("C", "F"), ("X", "F")]
+            if db.execute("SELECT 1 FROM nodes LIMIT 1").fetchone():
+                db.rollback()
+                raise ValueError("a scheduler database admits exactly one immutable DAG")
+            for tie, node in enumerate(nodes):
+                self._insert(
+                    db, node["id"], node.get("state", "BLOCKED"), node["work"],
+                    node.get("expected_cost", 1), node.get("expected_yield", 1),
+                    node.get("tie_order", tie),
+                )
+            ids = {node["id"] for node in nodes}
+            if any(parent not in ids or child not in ids for parent, child in edges):
+                db.rollback()
+                raise ValueError("every edge endpoint must be declared")
             db.executemany("INSERT INTO edges VALUES(?,?)", edges)
             db.execute("INSERT INTO config(run_id,barrier_target) VALUES(?,?)", (run_id, barrier_target))
             db.commit()
@@ -83,12 +116,19 @@ class Scheduler:
                    (nid, state, json.dumps(work, sort_keys=True), cost, yld, tie))
 
     def _event(self, db, kind, node_id, detail=None):
-        db.execute("INSERT INTO events(at,kind,node_id,detail) VALUES(?,?,?,?)",
-                   (time.time(), kind, node_id, json.dumps(detail or {}, sort_keys=True)))
+        cursor = db.execute("INSERT INTO events(at,kind,node_id,detail) VALUES(?,?,?,?)",
+                            (self._clock(), kind, node_id, json.dumps(detail or {}, sort_keys=True)))
+        return cursor.lastrowid
 
     def verify_root(self, node_id, receipt):
         with self._db() as db:
             db.execute("BEGIN IMMEDIATE")
+            node = db.execute("SELECT work,state FROM nodes WHERE id=?", (node_id,)).fetchone()
+            has_parent = db.execute("SELECT 1 FROM edges WHERE child=?", (node_id,)).fetchone()
+            if (not node or has_parent or node["state"] != "STALE"
+                    or json.loads(node["work"]).get("kind") != "root"):
+                db.rollback()
+                raise ValueError("root admission requires a declared, not-yet-admitted root")
             db.execute("UPDATE nodes SET state='VERIFIED', receipt=? WHERE id=?", (json.dumps(receipt), node_id))
             self._event(db, "verify_root", node_id, receipt)
             self._refresh(db)
@@ -125,7 +165,7 @@ class Scheduler:
             db.execute(
                 "INSERT INTO workers(run_id,worker,eligible,registered_at) VALUES(?,?,?,?) "
                 "ON CONFLICT(run_id,worker) DO UPDATE SET eligible=max(eligible,excluded.eligible)",
-                (run_id, worker, eligible, time.time()),
+                (run_id, worker, eligible, self._clock()),
             )
             db.commit()
 
@@ -134,7 +174,7 @@ class Scheduler:
         db.execute(
             "INSERT INTO workers(run_id,worker,eligible,registered_at) VALUES(?,?,?,?) "
             "ON CONFLICT(run_id,worker) DO UPDATE SET eligible=max(eligible,excluded.eligible)",
-            (run_id, worker, eligible, time.time()),
+            (run_id, worker, eligible, self._clock()),
         )
 
     def _barrier_ready(self, db, run_id):
@@ -173,20 +213,23 @@ class Scheduler:
             work = json.loads(row["work"])
             if work["kind"] != "gate" and not self._barrier_ready(db, run_id):
                 db.commit(); return None
-            token = uuid.uuid4().hex
+            token = self._token_source()
             parents = self._parents(db, row["id"])
             pv = {p["id"]: p["version"] for p in parents}
+            claimed_work = row["work"]
+            lease_until = self._clock() + self.lease_seconds
             updated = db.execute("UPDATE nodes SET state='CLAIMED' WHERE id=? AND state='OPEN'", (row["id"],)).rowcount
             if not updated:
                 db.rollback(); return None
-            db.execute("INSERT INTO claims(token,node_id,worker,run_id,lease_until,parent_versions,status) VALUES(?,?,?,?,?,?,?)",
-                       (token, row["id"], worker, run_id, time.time()+self.lease_seconds, json.dumps(pv, sort_keys=True), "LIVE"))
+            db.execute("INSERT INTO claims(token,node_id,worker,run_id,lease_until,node_version,parent_versions,claimed_work,status) VALUES(?,?,?,?,?,?,?,?,?)",
+                       (token, row["id"], worker, run_id, lease_until, row["version"],
+                        json.dumps(pv, sort_keys=True), claimed_work, "LIVE"))
             self._event(db, "claim", row["id"], {"worker": worker, "token": token, "priority": row["expected_yield"]/row["expected_cost"]})
             semantic = self._semantic_packet(row, parents)
             canonical = json.dumps(semantic, sort_keys=True, separators=(",", ":"))
             db.execute("INSERT INTO packets VALUES(?,?,?)", (token, canonical, len(canonical.encode())))
-            packet = {"node_id": row["id"], "claim_token": token, "lease_until": time.time()+self.lease_seconds,
-                      "worker": worker, "parent_versions": pv,
+            packet = {"node_id": row["id"], "node_version": row["version"], "claim_token": token,
+                      "lease_until": lease_until, "worker": worker, "parent_versions": pv,
                       "prerequisites": {p["id"]: json.loads(p["receipt"]) for p in parents},
                       "work": work, "output_contract": "Return one exact receipt to publish()."}
             db.commit(); return packet
@@ -214,19 +257,30 @@ class Scheduler:
             claim = db.execute("SELECT * FROM claims WHERE token=?", (token,)).fetchone()
             if not claim: raise StalePublication("unknown claim token")
             if claim["status"] == "ACCEPTED":
-                return json.loads(claim["result"])
+                result = json.loads(claim["result"])
+                node = db.execute("SELECT state,version FROM nodes WHERE id=?", (claim["node_id"],)).fetchone()
+                return {**result, "superseded": node["state"] != "VERIFIED" or node["version"] != claim["node_version"]}
             node = db.execute("SELECT * FROM nodes WHERE id=?", (claim["node_id"],)).fetchone()
             current = {p["id"]: p["version"] for p in self._parents(db, node["id"])}
-            if claim["status"] != "LIVE" or claim["lease_until"] < time.time() or current != json.loads(claim["parent_versions"]):
+            if (claim["status"] != "LIVE" or claim["lease_until"] < self._clock()
+                    or node["state"] != "CLAIMED" or node["version"] != claim["node_version"]
+                    or current != json.loads(claim["parent_versions"])):
                 self._event(db, "reject_stale", node["id"], {"token": token}); db.commit()
                 raise StalePublication("claim expired, cancelled, or based on stale parents")
-            work = json.loads(node["work"])
+            work = json.loads(claim["claimed_work"])
             if not check_receipt(work, receipt):
                 self._event(db, "reject_invalid", node["id"]); db.commit(); raise ValueError("invalid receipt")
-            result = {"node_id": node["id"], "status": "VERIFIED", "version": node["version"]}
+            result = {"node_id": node["id"], "status": "VERIFIED", "version": claim["node_version"],
+                      "superseded": False}
             db.execute("UPDATE claims SET status='ACCEPTED',result=? WHERE token=?", (json.dumps(result), token))
             db.execute("UPDATE nodes SET state='VERIFIED',receipt=? WHERE id=?", (json.dumps(receipt, sort_keys=True), node["id"]))
-            self._event(db, "accept", node["id"], {"token": token})
+            detail = {"token": token, "node_version": claim["node_version"],
+                      "parent_versions": json.loads(claim["parent_versions"])}
+            acceptance_seq = self._event(db, "accept", node["id"], detail)
+            digest = hashlib.sha256(json.dumps(receipt, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            db.execute("INSERT INTO publications VALUES(?,?,?,?,?,?,?)",
+                       (token, node["id"], claim["node_version"], claim["parent_versions"],
+                        digest, acceptance_seq, json.dumps(result, sort_keys=True)))
             if work["kind"] == "gate" and not receipt["verdict"]:
                 for child in db.execute("SELECT child FROM edges WHERE parent=?", (node["id"],)).fetchall():
                     db.execute("UPDATE nodes SET state='KILLED' WHERE id=?", (child["child"],)); self._event(db, "kill", child["child"])
@@ -234,13 +288,20 @@ class Scheduler:
 
     def progress(self, token, units):
         with self._db() as db:
+            db.execute("BEGIN IMMEDIATE")
             claim = db.execute("SELECT * FROM claims WHERE token=?", (token,)).fetchone()
-            if not claim or claim["status"] != "LIVE": raise StalePublication("cancelled claim")
-            db.execute("UPDATE claims SET progress=? WHERE token=?", (units, token)); self._event(db, "progress", claim["node_id"], {"units": units})
+            node = db.execute("SELECT state,version FROM nodes WHERE id=?", (claim["node_id"],)).fetchone() if claim else None
+            if (not claim or claim["status"] != "LIVE" or claim["lease_until"] < self._clock()
+                    or node["state"] != "CLAIMED" or node["version"] != claim["node_version"]):
+                db.rollback()
+                raise StalePublication("claim expired, cancelled, or superseded")
+            db.execute("UPDATE claims SET progress=? WHERE token=?", (units, token))
+            self._event(db, "progress", claim["node_id"], {"units": units})
+            db.commit()
 
     def reap_expired(self):
         """Cancel expired leases and deterministically reopen their unchanged nodes."""
-        now, reopened = time.time(), []
+        now, reopened = self._clock(), []
         with self._db() as db:
             db.execute("BEGIN IMMEDIATE")
             claims = db.execute("SELECT * FROM claims WHERE status='LIVE' AND lease_until<? ORDER BY node_id", (now,)).fetchall()
@@ -257,7 +318,45 @@ class Scheduler:
             db.commit()
         return reopened
 
+    def update_root(self, node_id, receipt, work_patch=None):
+        """Atomically replace a trusted root and invalidate exactly its descendants."""
+        with self._db() as db:
+            db.execute("BEGIN IMMEDIATE")
+            root = db.execute("SELECT * FROM nodes WHERE id=?", (node_id,)).fetchone()
+            has_parent = db.execute("SELECT 1 FROM edges WHERE child=?", (node_id,)).fetchone()
+            if not root or has_parent or json.loads(root["work"]).get("kind") != "root":
+                db.rollback()
+                raise ValueError("trusted root update may target only a declared root")
+            todo, affected = [node_id], []
+            while todo:
+                nid = todo.pop(0)
+                if nid in affected:
+                    continue
+                affected.append(nid)
+                todo += [r["child"] for r in db.execute(
+                    "SELECT child FROM edges WHERE parent=? ORDER BY child", (nid,)
+                )]
+            if work_patch:
+                work = json.loads(root["work"])
+                work.update(work_patch)
+                db.execute("UPDATE nodes SET work=? WHERE id=?", (json.dumps(work, sort_keys=True), node_id))
+            for nid in affected:
+                db.execute(
+                    "UPDATE nodes SET state='BLOCKED',version=version+1,receipt=NULL WHERE id=?", (nid,)
+                )
+                db.execute("UPDATE claims SET status='CANCELLED' WHERE node_id=? AND status='LIVE'", (nid,))
+                self._event(db, "invalidate", nid, {"source": node_id, "authority": "root_update"})
+            db.execute(
+                "UPDATE nodes SET state='VERIFIED',receipt=? WHERE id=?",
+                (json.dumps(receipt, sort_keys=True), node_id),
+            )
+            self._event(db, "update_root", node_id, {"affected": affected})
+            self._refresh(db)
+            db.commit()
+            return affected
+
     def invalidate(self, node_id, work_patch=None):
+        """Trusted internal revision: invalidate a node and its reachable descendants."""
         with self._db() as db:
             db.execute("BEGIN IMMEDIATE")
             todo, affected = [node_id], []

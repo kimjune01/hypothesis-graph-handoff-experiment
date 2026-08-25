@@ -17,6 +17,14 @@ def scheduler(tmp_path: Path) -> Scheduler:
     return s
 
 
+class LogicalClock:
+    def __init__(self, now=100.0):
+        self.now = now
+
+    def __call__(self):
+        return self.now
+
+
 def solve_and_publish(s: Scheduler, worker: str, expected: str | None = None):
     claim = s.claim(worker)
     assert claim
@@ -200,3 +208,88 @@ def test_worker_polls_pending_barrier_and_exits_at_terminal(tmp_path):
     assert not thread.is_alive()
     # Other workers may finish the now-released graph; terminal means F verified.
     assert s.node("F")["state"] == "VERIFIED"
+
+
+def test_claim_freezes_node_version_parent_versions_and_work(tmp_path):
+    s = scheduler(tmp_path)
+    claim = s.claim("w")
+    with s._db() as db:
+        row = db.execute("SELECT * FROM claims WHERE token=?", (claim["claim_token"],)).fetchone()
+    assert row["node_version"] == s.node(claim["node_id"])["version"]
+    assert json.loads(row["parent_versions"]) == claim["parent_versions"]
+    assert json.loads(row["claimed_work"]) == claim["work"]
+
+
+def test_publication_is_immutable_and_records_entitlement(tmp_path):
+    s = scheduler(tmp_path)
+    claim = s.claim("w")
+    receipt = discover(claim["work"])
+    result = s.publish(claim["claim_token"], receipt)
+    with s._db() as db:
+        publication = db.execute("SELECT * FROM publications WHERE claim_token=?", (claim["claim_token"],)).fetchone()
+        assert publication["node_version"] == claim["node_version"]
+        assert json.loads(publication["parent_versions"]) == claim["parent_versions"]
+        assert json.loads(publication["result"]) == result
+        with pytest.raises(Exception):
+            db.execute("DELETE FROM publications WHERE claim_token=?", (claim["claim_token"],))
+        with pytest.raises(Exception):
+            db.execute("UPDATE events SET kind='tampered'")
+
+
+def test_accepted_replay_after_invalidation_is_historical_only(tmp_path):
+    s = scheduler(tmp_path)
+    claim, accepted = solve_and_publish(s, "w")
+    s.invalidate(claim["node_id"], {"n": 99})
+    replay = s.publish(claim["claim_token"], discover(claim["work"]))
+    assert accepted["superseded"] is False
+    assert replay == {**accepted, "superseded": True}
+    assert s.node(claim["node_id"])["state"] != "VERIFIED"
+
+
+def test_progress_rejects_expired_lease_with_logical_clock(tmp_path):
+    clock = LogicalClock()
+    s = Scheduler(tmp_path / "clock.db", lease_seconds=5, clock=clock, token_source=iter(["token-1"]).__next__)
+    s.install_frozen_dag(difficulty=1)
+    s.verify_root("R0", {"value": "root"})
+    claim = s.claim("w")
+    assert claim["claim_token"] == "token-1"
+    clock.now += 6
+    with pytest.raises(StalePublication):
+        s.progress(claim["claim_token"], 1)
+
+
+def test_root_admission_rejects_non_root_and_arbitrary_dag_is_supported(tmp_path):
+    s = Scheduler(tmp_path / "dag.db", token_source=iter(["t"]).__next__)
+    nodes = [
+        {"id": "R", "state": "STALE", "work": {"kind": "root", "node_id": "R"}},
+        {"id": "A", "state": "BLOCKED", "work": {"kind": "gate", "node_id": "A", "n": 3}},
+    ]
+    s.install_dag(nodes, [("R", "A")])
+    with pytest.raises(ValueError):
+        s.verify_root("A", {"value": "not-authoritative"})
+    s.verify_root("R", {"value": "root"})
+    assert s.claim("w")["node_id"] == "A"
+
+
+def test_authoritative_root_update_invalidates_only_reachable_nodes(tmp_path):
+    s = Scheduler(tmp_path / "roots.db")
+    nodes = [
+        {"id": "R1", "state": "STALE", "work": {"kind": "root", "node_id": "R1"}},
+        {"id": "A", "state": "BLOCKED", "work": {"kind": "gate", "node_id": "A", "n": 3}},
+        {"id": "R2", "state": "STALE", "work": {"kind": "root", "node_id": "R2"}},
+        {"id": "B", "state": "BLOCKED", "work": {"kind": "gate", "node_id": "B", "n": 3}},
+    ]
+    s.install_dag(nodes, [("R1", "A"), ("R2", "B")])
+    s.verify_root("R1", {"value": "one"})
+    s.verify_root("R2", {"value": "two"})
+    with pytest.raises(ValueError):
+        s.verify_root("R1", {"value": "silent-replacement"})
+    before = s.node("B")
+    changed = s.update_root("R1", {"value": "one-v2"})
+    assert changed == ["R1", "A"]
+    assert s.node("R1")["state"] == "VERIFIED"
+    assert s.node("A")["state"] == "OPEN"
+    assert s.node("B")["state"] == before["state"]
+    assert s.node("B")["version"] == before["version"]
+    with pytest.raises(ValueError):
+        s.update_root("A", {"value": "forbidden"})
