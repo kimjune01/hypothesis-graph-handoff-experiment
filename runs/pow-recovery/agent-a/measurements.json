@@ -1,0 +1,26 @@
+{
+  "N1": {
+    "hashes_tried": 1884137,
+    "seconds": 4.704
+  },
+  "N2": {
+    "hashes_tried": 678484,
+    "seconds": 1.69
+  },
+  "N3": {
+    "hashes_tried": 2876981,
+    "seconds": 7.484
+  },
+  "D12": {
+    "hashes_tried": 385519,
+    "seconds": 1.305
+  },
+  "D23": {
+    "hashes_tried": 118959,
+    "seconds": 0.329
+  },
+  "E": {
+    "hashes_tried": 348440,
+    "seconds": 0.949
+  }
+}

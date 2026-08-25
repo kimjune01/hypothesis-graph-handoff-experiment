@@ -165,3 +165,13 @@ Receipt: `pow-recovery-design.md` and the next commit.
 - Froze difficulty at 20 bits. The old bundle requires 6,292,014 sequential candidate hashes; the authoritative repaired subtree requires 1,781,267 across `N1`, `D12`, and `E`. Verification remains one hash per receipt.
 - Defined corruption as a stale authoritative root: `N1` salt changes from `n1-authoritative-v1` to `n1-authoritative-v2`. This genuinely changes exactly `N1`, `D12`, and `E`; it is not a forged receipt that resolves to the old subtree after one repair.
 - Froze Agent A's task and prompt before its run. No recovery-agent outcome has been observed.
+
+## 2026-08-24 — PoW Agent A outcome and recovery freeze
+
+- Agent A independently implemented the frozen construction and produced receipts exactly matching the hidden deterministic bundle.
+- It performed 6,292,520 candidate hashes in 16.46 seconds across six nodes. Raw trace, program, receipts, measurements, and report are preserved under `runs/pow-recovery/agent-a/`.
+- Agent A also rescanned earlier nonces to verify the lowest-nonce convention. We clarified prospectively that receiver entitlement requires only PoW validity under current roots (one hash); lowest nonce remains a deterministic generation/grading convention, not a cheaply verified claim.
+- Froze the stale-N1 task, identical recovery prompt, Notes and Graph artifacts, and preregistration before any recovery-agent result.
+- Notes are 178 words and Graph 133 words; length was recorded rather than equalized.
+
+Receipt: `pow-recovery-preregistration.md`, `artifacts/pow-recovery/`, `prompts/pow-agent-b.md`, Agent A files, and the next commit.
