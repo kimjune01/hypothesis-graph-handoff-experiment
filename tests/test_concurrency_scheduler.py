@@ -258,6 +258,22 @@ def test_progress_rejects_expired_lease_with_logical_clock(tmp_path):
         s.progress(claim["claim_token"], 1)
 
 
+def test_lease_expires_exactly_at_deadline(tmp_path):
+    clock = LogicalClock()
+    s = Scheduler(tmp_path / "deadline.db", lease_seconds=5, clock=clock,
+                  token_source=iter(["token-1"]).__next__)
+    s.install_frozen_dag(difficulty=1)
+    s.verify_root("R0", {"value": "root"})
+    claim = s.claim("w")
+    receipt = discover(claim["work"])
+    clock.now = claim["lease_until"]
+    with pytest.raises(StalePublication):
+        s.publish(claim["claim_token"], receipt)
+    with pytest.raises(StalePublication):
+        s.progress(claim["claim_token"], 1)
+    assert s.reap_expired() == [claim["node_id"]]
+
+
 def test_root_admission_rejects_non_root_and_arbitrary_dag_is_supported(tmp_path):
     s = Scheduler(tmp_path / "dag.db", token_source=iter(["t"]).__next__)
     nodes = [

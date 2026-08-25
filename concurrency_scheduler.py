@@ -262,7 +262,7 @@ class Scheduler:
                 return {**result, "superseded": node["state"] != "VERIFIED" or node["version"] != claim["node_version"]}
             node = db.execute("SELECT * FROM nodes WHERE id=?", (claim["node_id"],)).fetchone()
             current = {p["id"]: p["version"] for p in self._parents(db, node["id"])}
-            if (claim["status"] != "LIVE" or claim["lease_until"] < self._clock()
+            if (claim["status"] != "LIVE" or claim["lease_until"] <= self._clock()
                     or node["state"] != "CLAIMED" or node["version"] != claim["node_version"]
                     or current != json.loads(claim["parent_versions"])):
                 self._event(db, "reject_stale", node["id"], {"token": token}); db.commit()
@@ -291,7 +291,7 @@ class Scheduler:
             db.execute("BEGIN IMMEDIATE")
             claim = db.execute("SELECT * FROM claims WHERE token=?", (token,)).fetchone()
             node = db.execute("SELECT state,version FROM nodes WHERE id=?", (claim["node_id"],)).fetchone() if claim else None
-            if (not claim or claim["status"] != "LIVE" or claim["lease_until"] < self._clock()
+            if (not claim or claim["status"] != "LIVE" or claim["lease_until"] <= self._clock()
                     or node["state"] != "CLAIMED" or node["version"] != claim["node_version"]):
                 db.rollback()
                 raise StalePublication("claim expired, cancelled, or superseded")
@@ -304,7 +304,7 @@ class Scheduler:
         now, reopened = self._clock(), []
         with self._db() as db:
             db.execute("BEGIN IMMEDIATE")
-            claims = db.execute("SELECT * FROM claims WHERE status='LIVE' AND lease_until<? ORDER BY node_id", (now,)).fetchall()
+            claims = db.execute("SELECT * FROM claims WHERE status='LIVE' AND lease_until<=? ORDER BY node_id", (now,)).fetchall()
             for claim in claims:
                 db.execute("UPDATE claims SET status='EXPIRED' WHERE token=?", (claim["token"],))
                 node = db.execute("SELECT state FROM nodes WHERE id=?", (claim["node_id"],)).fetchone()
