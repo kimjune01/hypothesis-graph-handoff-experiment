@@ -18,6 +18,7 @@ def export(run_dir: Path) -> None:
         db.row_factory = sqlite3.Row
         nodes = {row["id"]: dict(row) for row in db.execute("SELECT * FROM nodes")}
         claims = [dict(row) for row in db.execute("SELECT * FROM claims ORDER BY rowid")]
+        packets = [dict(row) for row in db.execute("SELECT * FROM packets ORDER BY rowid")]
 
     bad_receipts = []
     for node_id, node in nodes.items():
@@ -81,6 +82,7 @@ def export(run_dir: Path) -> None:
     (run_dir / "events.json").write_text(json.dumps(events, indent=2) + "\n")
     (run_dir / "nodes.json").write_text(json.dumps(nodes, indent=2) + "\n")
     (run_dir / "claims.json").write_text(json.dumps(claims, indent=2) + "\n")
+    (run_dir / "packets.json").write_text(json.dumps(packets, indent=2) + "\n")
     (run_dir / "grade.json").write_text(json.dumps(grade, indent=2) + "\n")
 
 

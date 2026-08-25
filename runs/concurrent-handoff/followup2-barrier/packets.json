@@ -1,0 +1,57 @@
+[
+  {
+    "claim_token": "fe7161802ce24265b181fa00a6b37e5d",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"GD\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"R0\":{\"receipt\":{\"kind\":\"root\",\"version\":1},\"version\":1}},\"work\":{\"kind\":\"gate\",\"n\":21,\"node_id\":\"GD\"}}",
+    "byte_count": 432
+  },
+  {
+    "claim_token": "00c02702cc1d4c17a9074af4df3212b5",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"GA\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"R0\":{\"receipt\":{\"kind\":\"root\",\"version\":1},\"version\":1}},\"work\":{\"kind\":\"gate\",\"n\":23,\"node_id\":\"GA\"}}",
+    "byte_count": 432
+  },
+  {
+    "claim_token": "ff7ce18f32c9418faf59b71f85c3140e",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"GB\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"R0\":{\"receipt\":{\"kind\":\"root\",\"version\":1},\"version\":1}},\"work\":{\"kind\":\"gate\",\"n\":29,\"node_id\":\"GB\"}}",
+    "byte_count": 432
+  },
+  {
+    "claim_token": "fda2f2f7839c4bf8b65ff37cd7408fb1",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"GC\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"R0\":{\"receipt\":{\"kind\":\"root\",\"version\":1},\"version\":1}},\"work\":{\"kind\":\"gate\",\"n\":31,\"node_id\":\"GC\"}}",
+    "byte_count": 432
+  },
+  {
+    "claim_token": "6fa94764db664ec4b701f2e25f171b6b",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"GE\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"R0\":{\"receipt\":{\"kind\":\"root\",\"version\":1},\"version\":1}},\"work\":{\"kind\":\"gate\",\"n\":37,\"node_id\":\"GE\"}}",
+    "byte_count": 432
+  },
+  {
+    "claim_token": "94545a7e41bf4419b693d135605d28c3",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"A\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"GA\":{\"receipt\":{\"digest\":\"ab49057b46d3c64a38f2d3f20e3ee588becd78e5dd697a61d24981d1a98d6001\",\"kind\":\"gate\",\"node_id\":\"GA\",\"verdict\":true},\"version\":1}},\"work\":{\"challenge\":\"frozen:A\",\"difficulty\":6,\"kind\":\"pow\",\"node_id\":\"A\"}}",
+    "byte_count": 554
+  },
+  {
+    "claim_token": "5de14c8fdeb840feb5b6bdf7d32fddf2",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"B\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"GB\":{\"receipt\":{\"digest\":\"1569a2a5e929bc35ddc11ea2a3f6e5e7101e5df97c4332ef4a45a51ab167cff0\",\"kind\":\"gate\",\"node_id\":\"GB\",\"verdict\":true},\"version\":1}},\"work\":{\"challenge\":\"frozen:B\",\"difficulty\":6,\"kind\":\"pow\",\"node_id\":\"B\"}}",
+    "byte_count": 554
+  },
+  {
+    "claim_token": "5e50e3a1f40447589bf87b66faa658d7",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"C\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"GC\":{\"receipt\":{\"digest\":\"c29f3873a3e19d033f160c87112e2d36aafa99297eecd114c68f58cc6f74b86e\",\"kind\":\"gate\",\"node_id\":\"GC\",\"verdict\":true},\"version\":1}},\"work\":{\"challenge\":\"frozen:C\",\"difficulty\":6,\"kind\":\"pow\",\"node_id\":\"C\"}}",
+    "byte_count": 554
+  },
+  {
+    "claim_token": "d00745ff29f74db48425af6b1c870bf7",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"X\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"GE\":{\"receipt\":{\"digest\":\"a9b8b2bd538d5b0dfcb586981ec82c656d62db9e5e3b8d0546c694cae91b46ae\",\"kind\":\"gate\",\"node_id\":\"GE\",\"verdict\":true},\"version\":1}},\"work\":{\"challenge\":\"frozen:X\",\"difficulty\":6,\"kind\":\"pow\",\"node_id\":\"X\"}}",
+    "byte_count": 554
+  },
+  {
+    "claim_token": "37fe14baf53147549731d1abba314ead",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"JAB\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"A\":{\"receipt\":{\"digest\":\"00000008b68cf5e5eb308c7cd2137944ecf6fc5ddf72b1212f79c65e50d5d01e\",\"kind\":\"pow\",\"node_id\":\"A\",\"nonce\":8641801},\"version\":1},\"B\":{\"receipt\":{\"digest\":\"000000858af4290b18259ac8e8469469b507192e7f4561229356bd5fe47327d1\",\"kind\":\"pow\",\"node_id\":\"B\",\"nonce\":44853054},\"version\":1}},\"work\":{\"challenge\":\"frozen:JAB\",\"difficulty\":6,\"kind\":\"pow\",\"node_id\":\"JAB\"}}",
+    "byte_count": 708
+  },
+  {
+    "claim_token": "df2749d0de544e11bb8fde54569a6d5b",
+    "canonical_json": "{\"checks\":{\"procedure\":\"check_receipt(work, receipt) must return true\"},\"kill_condition\":\"Reject publication if its receipt fails or any prerequisite version changes.\",\"objective\":{\"claim\":\"Produce the contracted receipt for this node.\",\"node_id\":\"F\"},\"output_contract\":\"Return one exact receipt to publish().\",\"prerequisites\":{\"C\":{\"receipt\":{\"digest\":\"0000003780f09b501d281bf1c3050df0d3b448475c0b9e5ff665640ba6b043df\",\"kind\":\"pow\",\"node_id\":\"C\",\"nonce\":18331937},\"version\":1},\"JAB\":{\"receipt\":{\"digest\":\"0000003339b1540466041c719ed60dbd0261136ebecf94bb74f4645e60e70c80\",\"kind\":\"pow\",\"node_id\":\"JAB\",\"nonce\":10321645},\"version\":1},\"X\":{\"receipt\":{\"digest\":\"0000006eb9eef2465858cbe5aea527732d7b99e3369f6d8ca410f1c78290341d\",\"kind\":\"pow\",\"node_id\":\"X\",\"nonce\":4028979},\"version\":1}},\"work\":{\"challenge\":\"frozen:F\",\"difficulty\":6,\"kind\":\"pow\",\"node_id\":\"F\"}}",
+    "byte_count": 856
+  }
+]

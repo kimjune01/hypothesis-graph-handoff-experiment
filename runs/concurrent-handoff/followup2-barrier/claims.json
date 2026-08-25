@@ -1,0 +1,123 @@
+[
+  {
+    "token": "fe7161802ce24265b181fa00a6b37e5d",
+    "node_id": "GD",
+    "worker": "followup2-1",
+    "run_id": "run",
+    "lease_until": 1787621383.135076,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GD\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "00c02702cc1d4c17a9074af4df3212b5",
+    "node_id": "GA",
+    "worker": "followup2-1",
+    "run_id": "run",
+    "lease_until": 1787621383.136518,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GA\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "ff7ce18f32c9418faf59b71f85c3140e",
+    "node_id": "GB",
+    "worker": "followup2-1",
+    "run_id": "run",
+    "lease_until": 1787621383.1376698,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GB\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "fda2f2f7839c4bf8b65ff37cd7408fb1",
+    "node_id": "GC",
+    "worker": "followup2-1",
+    "run_id": "run",
+    "lease_until": 1787621383.138556,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GC\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "6fa94764db664ec4b701f2e25f171b6b",
+    "node_id": "GE",
+    "worker": "followup2-1",
+    "run_id": "run",
+    "lease_until": 1787621383.139681,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GE\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "94545a7e41bf4419b693d135605d28c3",
+    "node_id": "A",
+    "worker": "followup2-3",
+    "run_id": "run",
+    "lease_until": 1787621393.639617,
+    "parent_versions": "{\"GA\": 1}",
+    "status": "ACCEPTED",
+    "progress": 8640000,
+    "result": "{\"node_id\": \"A\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "5de14c8fdeb840feb5b6bdf7d32fddf2",
+    "node_id": "B",
+    "worker": "followup2-2",
+    "run_id": "run",
+    "lease_until": 1787621393.6412401,
+    "parent_versions": "{\"GB\": 1}",
+    "status": "ACCEPTED",
+    "progress": 44850000,
+    "result": "{\"node_id\": \"B\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "5e50e3a1f40447589bf87b66faa658d7",
+    "node_id": "C",
+    "worker": "followup2-1",
+    "run_id": "run",
+    "lease_until": 1787621393.6472352,
+    "parent_versions": "{\"GC\": 1}",
+    "status": "ACCEPTED",
+    "progress": 18330000,
+    "result": "{\"node_id\": \"C\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "d00745ff29f74db48425af6b1c870bf7",
+    "node_id": "X",
+    "worker": "followup2-3",
+    "run_id": "run",
+    "lease_until": 1787621397.093089,
+    "parent_versions": "{\"GE\": 1}",
+    "status": "ACCEPTED",
+    "progress": 4020000,
+    "result": "{\"node_id\": \"X\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "37fe14baf53147549731d1abba314ead",
+    "node_id": "JAB",
+    "worker": "followup2-2",
+    "run_id": "run",
+    "lease_until": 1787621411.6932428,
+    "parent_versions": "{\"A\": 1, \"B\": 1}",
+    "status": "ACCEPTED",
+    "progress": 10320000,
+    "result": "{\"node_id\": \"JAB\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "df2749d0de544e11bb8fde54569a6d5b",
+    "node_id": "F",
+    "worker": "followup2-2",
+    "run_id": "run",
+    "lease_until": 1787621415.8239481,
+    "parent_versions": "{\"C\": 1, \"JAB\": 1, \"X\": 1}",
+    "status": "ACCEPTED",
+    "progress": 19170000,
+    "result": "{\"node_id\": \"F\", \"status\": \"VERIFIED\", \"version\": 1}"
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "frozen_full_notes_bytes": 1283,
+  "fixed_worker_wrapper_bytes": 880,
+  "assignment_and_model_input_bytes_observed": false,
+  "entries": {
+    "A": {"worker": "followup2-3", "packet_bytes": 554, "oracle_byte_match": true},
+    "B": {"worker": "followup2-2", "packet_bytes": 554, "oracle_byte_match": true},
+    "C": {"worker": "followup2-1", "packet_bytes": 554, "oracle_byte_match": true}
+  },
+  "three_worker_full_notes_payload_bytes": 3849,
+  "three_worker_packet_payload_bytes": 1662,
+  "payload_bytes_avoided": 2187,
+  "payload_fraction_avoided": 0.5681995323460632
+}

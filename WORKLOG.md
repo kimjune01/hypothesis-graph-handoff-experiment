@@ -257,6 +257,19 @@ Receipt: harness commit `dfd013b`, `concurrent-followup-preregistration.md`, `ar
 
 Receipt: `concurrent-followup2-preregistration.md` and the next commit.
 
+## 2026-08-24 — Corrected concurrency Follow-up 2 outcome
+
+- Three fresh workers completed Follow-up 2 without infrastructure errors.
+- Barrier released A, B, and C to three distinct workers within 7.699 ms. Their intervals had 3.443 seconds of common overlap, passing the frozen concurrency criterion.
+- Exact final F and all receipts passed; no duplicate node-version acceptance or invalid dependency publication occurred.
+- Follow-up elapsed 40.445 seconds from first frontier claim to F versus 41.198 seconds serial, only 1.83% less. Withheld any material speedup claim.
+- Captured A/B/C semantic packets each matched their prospectively frozen 554-byte oracle packet exactly.
+- Full Notes were 1,283 bytes. Entry packets reduced per-worker payload by 56.82% and total three-worker payload by 2,187 bytes. Fixed wrapper was 880 bytes per worker; assignment/model token bytes remain unobserved.
+- Economy gate order and D pruning passed again; no scheduling-regret claim added.
+- Interpretation: safe three-worker graph-addressable handoff and bounded sufficient packets demonstrated on one frozen DAG; general scaling and curated-packet superiority remain unsupported.
+
+Receipt: `concurrent-followup-results.md`, `concurrent-followup-result-hypothesis-graph.md`, Follow-up 2 database/events/packets/grade, and the next commit.
+
 ## 2026-08-24 — Economy of search added prospectively
 
 - Clarified the user's intended term: Peircean uberty is expected fertility, or how much new knowledge a move may produce.
