@@ -45,7 +45,7 @@ def _mutate(source: str, name: str) -> str:
     if name == "receipt-bypass":
         return _replace_once(source, "if not check_receipt(work, receipt):", "if False and not check_receipt(work, receipt):")
     if name == "version-entitlement-bypass":
-        source = _replace_once(source, "or node[\"state\"] != \"CLAIMED\" or node[\"version\"] != claim[\"node_version\"]\n                    or current != json.loads(claim[\"parent_versions\"])", "or False  # mutant: bypass current node and parent entitlement")
+        source = _replace_once(source, "or node[\"state\"] != \"CLAIMED\" or node[\"version\"] != claim[\"node_version\"]\n                    or current != json.loads(claim[\"parent_versions\"])", "or False")
         return _in_update_root(source, "db.execute(\"UPDATE claims SET status='CANCELLED' WHERE node_id=? AND status='LIVE'\", (nid,))", "pass  # mutant: leave stale claim live")
     if name == "expired-token-acceptance":
         return _replace_once(source, "claim[\"lease_until\"] <= self._clock()", "False and claim[\"lease_until\"] <= self._clock()")
@@ -82,5 +82,7 @@ def run_declared_mutants(repo: Path, scratch: Path) -> tuple[MutationResult, ...
             [sys.executable, "-m", "pytest", "-q", test], cwd=target,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False,
         )
-        results.append(MutationResult(name, test, completed.returncode != 0, completed.returncode))
+        # Pytest code 1 means the selected test executed and failed. Collection,
+        # usage, interruption, and infrastructure errors do not kill a mutant.
+        results.append(MutationResult(name, test, completed.returncode == 1, completed.returncode))
     return tuple(results)
