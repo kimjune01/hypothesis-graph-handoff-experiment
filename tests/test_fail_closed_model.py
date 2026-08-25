@@ -20,11 +20,13 @@ def test_claim_publish_and_idempotent_replay():
 
 def test_root_update_cancels_claims_and_makes_replay_superseded():
     state = initial_diamond()
+    old_work_roots = {node: record.work_root for node, record in state.nodes.items()}
     state, claim = step(state, Action("claim", worker="w1", node="A"))
     state, _ = step(state, Action("publish", token=claim.token, receipt="valid"))
     state, _ = step(state, Action("update_root"))
 
     assert state.nodes["A"].state == "OPEN"
+    assert {node: record.work_root for node, record in state.nodes.items()} == old_work_roots
     replayed, replay = step(state, Action("publish", token=claim.token, receipt="valid"))
     assert replay.accepted and replay.disposition == "superseded-replay"
     assert replayed.nodes["A"].state == "OPEN"

@@ -79,12 +79,13 @@ def _digest(value: str) -> str:
     return sha256(value.encode()).hexdigest()
 
 
-def initial_diamond(lease_ticks: int = 2) -> Model:
+def initial_diamond(lease_ticks: int = 2, work_roots: dict[str, str] | None = None) -> Model:
+    roots = work_roots or {node: _digest(f"work:{node}:1") for node in ("R", "A", "B", "J")}
     nodes = {
-        "R": Node("VERIFIED", 1, "root:1", _digest("work:R:1")),
-        "A": Node("OPEN", 1, None, _digest("work:A:1")),
-        "B": Node("OPEN", 1, None, _digest("work:B:1")),
-        "J": Node("BLOCKED", 1, None, _digest("work:J:1")),
+        "R": Node("VERIFIED", 1, "root:1", roots["R"]),
+        "A": Node("OPEN", 1, None, roots["A"]),
+        "B": Node("OPEN", 1, None, roots["B"]),
+        "J": Node("BLOCKED", 1, None, roots["J"]),
     }
     return Model(nodes, (("R", "A"), ("R", "B"), ("A", "J"), ("B", "J")), {}, (), 0, lease_ticks, 1, ())
 
@@ -158,15 +159,15 @@ def _publish(state: Model, action: Action) -> tuple[Model, Result]:
         return state, Result(False, "stale")
     if any(state.nodes[p].state != "VERIFIED" for p, _ in claim.parent_versions):
         return state, Result(False, "stale-parent")
-    if action.receipt != "valid":
+    if action.receipt in (None, "invalid"):
         return state, Result(False, "invalid-receipt")
     claims = dict(state.claims); claims[claim.token] = claim._replace(status="ACCEPTED")
     nodes = dict(state.nodes)
-    nodes[claim.node] = node._replace(state="VERIFIED", receipt="valid",
+    nodes[claim.node] = node._replace(state="VERIFIED", receipt=action.receipt,
                                       accepted_parent_versions=claim.parent_versions)
     _refresh(nodes, state.edges)
     pub = Publication(claim.token, claim.node, claim.node_version, claim.parent_versions,
-                      claim.work_root, _digest("valid"), len(state.publications) + 1)
+                      claim.work_root, _digest(action.receipt), len(state.publications) + 1)
     new = state._replace(nodes=nodes, claims=claims, publications=state.publications + (pub,),
                          events=state.events + ("publish",))
     return new, Result(True, "accepted", claim.token)
@@ -191,13 +192,12 @@ def _update_root(state: Model, action: Action) -> tuple[Model, Result]:
     nodes, claims = dict(state.nodes), dict(state.claims)
     root = nodes["R"]
     root_version = root.version + 1
-    nodes["R"] = root._replace(version=root_version, receipt=f"root:{root_version}",
-                                work_root=_digest(f"work:R:{root_version}"))
+    nodes["R"] = root._replace(version=root_version,
+                                receipt=action.receipt or f"root:{root_version}")
     descendants = _descendants(state, "R")
     for node_id in descendants:
         node = nodes[node_id]
         nodes[node_id] = node._replace(state="BLOCKED", version=node.version + 1, receipt=None,
-                                       work_root=_digest(f"work:{node_id}:{node.version + 1}"),
                                        accepted_parent_versions=())
     for token, claim in tuple(claims.items()):
         if claim.status == "LIVE" and claim.node in descendants:
