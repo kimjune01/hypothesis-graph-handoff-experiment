@@ -156,3 +156,12 @@ Receipt: `2x2-results.md`, `2x2-result-hypothesis-graph.md`, `runs/2x2/`, and th
 - No instance, artifact, or recovery outcome has been generated.
 
 Receipt: `pow-recovery-design.md` and the next commit.
+
+## 2026-08-24 — Prospective PoW construction freeze
+
+- Wrote failing tests before implementation for the six-node DAG, exact transitive invalidation, deterministic receipts, fail-closed checks, and selective-recovery grading.
+- Implemented the harness after the expected missing-module failure; all 25 repository tests pass.
+- Calibration at 18–20 bits was performed before instance freeze. Exact 21–22-bit challenges showed an excessive deterministic heavy tail; stopped only those calibration processes and retained every observation.
+- Froze difficulty at 20 bits. The old bundle requires 6,292,014 sequential candidate hashes; the authoritative repaired subtree requires 1,781,267 across `N1`, `D12`, and `E`. Verification remains one hash per receipt.
+- Defined corruption as a stale authoritative root: `N1` salt changes from `n1-authoritative-v1` to `n1-authoritative-v2`. This genuinely changes exactly `N1`, `D12`, and `E`; it is not a forged receipt that resolves to the old subtree after one repair.
+- Froze Agent A's task and prompt before its run. No recovery-agent outcome has been observed.
