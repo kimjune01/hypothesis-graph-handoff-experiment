@@ -24,7 +24,7 @@ The environment permits three concurrent child workers because the root coordina
 
 Edges: `R0→A`, `R0→B`, `R0→C`, `A→JAB`, `B→JAB`, `JAB→F`, `C→F`.
 
-Use calibrated deterministic proof-of-work certificates. Frontier discovery should take approximately 15–30 seconds single-core; joins 5–10 seconds. Verification is one hash. Freeze challenges, lowest-valid nonces, process/thread count, and calibration before agent runs. Workers invoke provided `discover` and `check` commands; they do not edit scheduler or verifier code.
+Use calibrated deterministic proof-of-work certificates. Verification is one hash. Freeze challenges, lowest-valid nonces, process/thread count, and calibration before agent runs. Workers invoke provided `discover` and `check` commands; they do not edit scheduler or verifier code. Retain the calibrated instance even if its realized node costs are less uniform than the target range.
 
 PoW gives controlled work and exact receipts, but it has almost no epistemic uberty: every nonce is known to exist and no hypothesis is genuinely at risk. It therefore tests concurrency and coordination only. Economy of search is tested through a separate set of cheap discriminating gates described below; do not infer search fertility from PoW completion.
 

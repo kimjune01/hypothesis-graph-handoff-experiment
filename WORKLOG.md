@@ -212,6 +212,17 @@ Receipt: `concurrent-handoff-experiment-design.md` and the next commit.
 
 Receipt: revised `concurrent-handoff-experiment-design.md` and the next commit.
 
+## 2026-08-24 — Concurrent scheduler implementation and protocol freeze
+
+- Delegated the scheduler harness to a Codex worker subagent with explicit file ownership and TDD requirements.
+- The worker wrote failing tests then implemented atomic priority claims, leases, claim tokens, parent-version vectors, exact receipt publication, idempotency, expiry, immutable events, gate pruning, bounded packets, progress, cancellation, transitive invalidation, and stale rejection.
+- Independently ran the full repository suite: 33 tests pass and the diff is clean.
+- Calibrated the committed challenges at five then six leading hexadecimal zeros before worker outcomes. Kept difficulty six without selecting replacement challenges despite unequal realized costs.
+- Froze the serial, three-worker concurrent, no-update, and mid-JAB invalidation protocols, exact criteria, prompts, and claim boundary.
+- No serial or concurrent worker has run.
+
+Receipt: `concurrent-handoff-preregistration.md`, `prompts/concurrency-worker.md`, harness commit `b3747a9`, and the next commit.
+
 ## 2026-08-24 — Economy of search added prospectively
 
 - Clarified the user's intended term: Peircean uberty is expected fertility, or how much new knowledge a move may produce.
