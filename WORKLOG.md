@@ -283,6 +283,18 @@ Receipt: `concurrent-followup-results.md`, `concurrent-followup-result-hypothesi
 
 Receipt: `fail-closed-memory-experiment-design.md` and the next commit.
 
+## 2026-08-24 — Independent audit narrows fail-closed experiment
+
+- Before execution, sent the design and current scheduler to a fresh Codex subagent for independent review.
+- Reviewer advised not to run the original design: current claims lack node-version fields; accepted events lack auditable parent versions; events are mutable; root admission is unchecked; progress ignores expiry; and accepted-token replay after invalidation has ambiguous stale semantics.
+- Reviewer also found the proposed exhaustive/property layers infeasible without logical time, deterministic tokens, declarative arbitrary-DAG fixtures, and a frozen observable-state equivalence relation.
+- Replaced the 10,000×200 property run as load-bearing evidence with complete bounded diamond-DAG exploration, three frozen real races, pre-commit crash failpoints, and nine exact mutants. Property testing is supplementary at 1,000×75 with coverage reporting.
+- Separated safety from liveness, removed priority policy from the safety claim, made cap exhaustion inconclusive, and explicitly bounded the trusted computing base.
+- Added required immutable publication records and historical version semantics before any confirmatory run.
+- No confirmatory fault test has run.
+
+Receipt: revised `fail-closed-memory-experiment-design.md` and the next commit.
+
 ## 2026-08-24 — Economy of search added prospectively
 
 - Clarified the user's intended term: Peircean uberty is expected fertility, or how much new knowledge a move may produce.

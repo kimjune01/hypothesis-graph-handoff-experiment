@@ -1,189 +1,188 @@
 # Fail-closed shared memory experiment
 
-Status: prospective design; no new fault-testing outcome has been generated.
+Status: revised prospectively after independent subagent audit; not yet implemented or run.
 
 ## Claim under test
 
-> Within a declared bounded fault model, the hypothesis graph preserves replay, version, publication, and selective-invalidation invariants under concurrent agent use.
+> This scheduler version preserves declared replay, version, publication, and selective-invalidation safety invariants over a frozen bounded state space, race schedules, crash points, and fault mutants.
 
-This is a reliability claim about the shared-memory protocol, not a claim that models reason better. “Fail-closed” means an unsupported or stale result cannot enter verified memory or unlock downstream work; the system may refuse progress rather than accept an unentitled claim.
+“Fail-closed” means unsupported or stale results cannot enter verified memory or unlock downstream work. Refusing progress is safe. Liveness is evaluated separately and is not required for this safety claim.
 
-The experiment tests the executable state machine, not LLM judgment. Workers are modeled as untrusted clients that may fail, retry, delay, duplicate, corrupt, or reorder requests.
+This is an implementation- and boundary-specific claim about shared memory, not model capability or semantic correctness.
 
-## System under test
+## Trusted computing base
 
-The SQLite-backed scheduler in `concurrency_scheduler.py`:
+Trusted:
 
-- versioned nodes and parent-version vectors;
-- atomic claim tokens and leases;
-- exact receipt checking;
-- idempotent publication;
-- dependency-directed opening;
-- transitive invalidation and cancellation; and
-- immutable event and packet records.
+- receipt checker and task specification;
+- root-admission and root-update authority;
+- scheduler process and installed code;
+- SQLite engine and transaction semantics;
+- operating system, clock source supplied to the scheduler, and storage root; and
+- cryptographic hash behavior.
 
-Use a pure in-memory reference model implementing the same public contract independently. Every generated action is applied to both the reference model and the SQLite implementation; observable state and invariant verdicts are compared after every step.
+Untrusted workers may crash, retry, delay, reorder, duplicate, corrupt, or omit requests. Direct database writes, checker compromise, scheduler compromise, database rollback, disk loss, and specification inadequacy are excluded.
 
-## Safety invariants
+Root admission is not ordinary worker publication. The implementation must either validate roots under a declared root checker or expose root admission as an explicit trusted operation that cannot target non-root nodes.
+
+## Required observability changes before preregistration
+
+Do not run confirmatory tests until the implementation records enough information to adjudicate its invariants:
+
+1. Claims record `node_version` as well as the parent-version vector.
+2. An immutable publication table records claim token, node, node version, parent-version vector, receipt digest, acceptance sequence, and result.
+3. Accepted publication events carry the same version information or link to the publication record.
+4. Event immutability is either enforced with database triggers and tested, or removed from the protocol guarantee and treated as trusted storage behavior.
+5. `progress()` enforces live lease and token status.
+6. Accepted-token replay after later invalidation has an explicit rule. Recommended: return the historical accepted result marked `superseded`, never represent it as current entitlement, and never unlock work.
+7. Receipt validation uses the claimed node version's frozen work roots, not whichever work happens to be current later.
+8. Invalidation scope is defined: root updates are authoritative; internal invalidation is either prohibited or separately specified. Killed-branch reopening semantics are explicit.
+
+The scheduler must also support deterministic testing through an injected logical clock, deterministic token source, and declarative arbitrary-DAG fixtures.
+
+## Observable-state projection
+
+Freeze a projection used to compare a pure reference model with SQLite after every action:
+
+- node ID, state, version, current receipt digest, and frozen work-root digest;
+- edges and required parent versions;
+- live/expired/cancelled/accepted claim status with node version;
+- immutable accepted publication records;
+- killed nodes and reopen eligibility; and
+- ordered semantic transition kinds.
+
+Exclude random UUID spelling, wall-clock timestamps, SQLite row IDs, JSON whitespace, and other incidental representation. Freeze the equivalence relation before execution.
+
+The reference model is derived from a declarative transition table, not translated line-by-line from scheduler code. Invariant checks are implemented separately from both systems.
+
+## Load-bearing safety invariants
 
 Check after every transition:
 
-1. **Receipt entitlement:** every `VERIFIED` non-root node has a receipt that passes its current checker.
-2. **Version entitlement:** every accepted publication's parent-version vector equals the currently verified parent versions at acceptance.
-3. **Dependency closure:** a `VERIFIED` node has all required parents verified at the recorded versions.
-4. **Unique publication:** at most one publication is accepted for each `(node, version)`.
-5. **Stale exclusion:** an expired, cancelled, unknown, or stale-parent claim never changes a node to `VERIFIED` and never unlocks a child.
-6. **Exact invalidation:** changing root `r` invalidates every reachable descendant and no unreachable node.
-7. **Independent preservation:** unaffected verified nodes retain version, receipt, and verified state byte-for-byte.
-8. **Claim exclusivity:** at most one live claim exists per node-version and per worker-run pair.
-9. **Idempotency:** repeating a successful publish returns the original result without a second state transition.
-10. **Audit monotonicity:** committed event and packet records cannot be changed or deleted through the public protocol.
-11. **Priority safety:** priority changes which eligible node is claimed, never whether an ineligible node becomes claimable.
-12. **Fail-closed recovery:** after a rejected action, the graph remains in a state satisfying invariants 1–11.
+1. **Receipt entitlement:** every verified non-root node has a receipt valid for its accepted node version and frozen work roots.
+2. **Version entitlement:** an accepted publication records its claimed node version and the exact currently verified parent versions at acceptance.
+3. **Dependency closure:** a verified node's required parents were verified at its recorded versions when accepted.
+4. **Unique acceptance:** at most one current acceptance exists for each `(node, version)`; idempotent replay creates no second publication.
+5. **Stale exclusion:** unknown, expired, cancelled, superseded, wrong-version, or stale-parent claims cannot verify a node or unlock a child.
+6. **Claim exclusivity:** at most one live claim exists per node-version and per worker-run pair.
+7. **Exact invalidation:** a root update invalidates every reachable descendant and no unreachable node.
+8. **Independent preservation:** unreachable verified nodes retain state, version, and receipt byte-for-byte.
+9. **Atomic publication:** claim acceptance, node verification, publication record, and unlock event are all committed or none are.
+10. **Fail-closed rejection:** every rejected or interrupted action leaves invariants 1–9 true.
 
-Liveness is separate. Under a fair worker that eventually submits valid receipts and without further root changes, every reachable open frontier should eventually reach the terminal verified result. This conditional property must not be conflated with safety: refusing progress still passes fail-closed safety.
+Audit-record immutability is a separate storage-integrity property unless the revised implementation enforces it explicitly. Priority order is excluded; it is scheduling policy, not fail-closed memory.
 
-## Declared fault model
+## Declared worker fault model
 
-### Included
+- fail-stop before claim, during work, after progress, before publish, and after commit but before response;
+- duplicate, delayed, retried, and reordered public API calls;
+- malformed, missing, wrong-node, corrupted, stale-work, and wrong-version receipts;
+- unknown, expired, reused, cancelled, and superseded tokens;
+- root update before claim, during live descendant work, immediately before publish, and after acceptance;
+- two root updates sharing one descendant;
+- simultaneous claim races;
+- publish-versus-invalidate and expiry-versus-publish races;
+- duplicate invalidation and retry after reopen; and
+- pass/fail gates with pending, killed, and independent branches.
 
-- worker fail-stop before claim, during work, after progress, before publish, and after publish response loss;
-- duplicate, delayed, retried, and reordered claim/progress/publish requests;
-- unknown, expired, reused, and cancelled claim tokens;
-- missing, malformed, corrupted, wrong-node, and wrong-root receipts;
-- lease expiry immediately before progress or publication;
-- one or two root rotations before, during, and after descendant work;
-- stale publication after invalidation;
-- simultaneous claim races from multiple workers;
-- simultaneous publication and invalidation transactions;
-- duplicate invalidation and retry after database reopen;
-- process termination at transaction boundaries followed by SQLite reopen;
-- gates that pass, fail, or change version while descendants are pending;
-- independent branches sharing one ancestor.
+## Load-bearing evidence
 
-### Excluded
+### 1. Deterministic transition suite
 
-- a malicious client with direct write access to the SQLite database or scheduler process;
-- corruption of the checker, task specification, scheduler binary, SQLite engine, or operating system;
-- disk loss, undetected storage corruption, compromised cryptographic hashes, or rollback of the entire database;
-- distributed multi-primary databases, network partitions, or clocks outside the single-host lease assumptions;
-- semantic inadequacy of a correctly replayed predicate.
+Test every permitted transition and rejection path individually, including historical accepted-token replay after invalidation and root admission boundaries. Target complete transition/fault coverage rather than line coverage.
 
-These exclusions bound the claim. The protocol guards against untrusted workers, not a compromised verifier or storage root.
+### 2. Complete bounded exploration
 
-## Test architecture
+Use logical time and deterministic tokens on the frozen diamond DAG `R→A,B; A,B→J` with two workers.
 
-### Layer 1: deterministic unit and transition tests
+Before execution freeze:
 
-Cover every public transition and rejection path individually. Target 100% transition coverage, not line coverage as a proxy.
+- exact initial state and versions;
+- complete action alphabet and preconditions;
+- exact maximum depth;
+- maximum unique-state cap;
+- state canonicalization and equivalence relation; and
+- invariant checker hash.
 
-Required cases include claim race, valid publish, every invalid receipt form, idempotent retry, expiry, cancellation, reopening, gate kill, root rotation, exact closure, preserved branch, stale publish, and terminal state.
+Enumerate every enabled action/fault to the frozen depth, deduplicating equivalent projected states. Report states, transitions, equivalent states pruned, maximum depth reached, and counterexamples.
 
-### Layer 2: bounded exhaustive model exploration
+Hitting the state cap is an inconclusive/failing layer, never a pass. “Exhaustive” always means only within the frozen DAG, alphabet, and depth.
 
-Use a minimal diamond graph `R→A,B; A,B→J` with two workers. Enumerate every enabled action and included fault through a frozen depth sufficient to contain claim, invalidation, expiry, retry, and recovery cycles. Canonicalize equivalent states to avoid exploring action-order permutations that yield the same state.
+### 3. Frozen real races
 
-Freeze before execution:
+Against SQLite WAL mode, use barriers to run:
 
-- graph and initial versions;
-- action alphabet;
-- maximum depth and state cap;
-- state-canonicalization rule; and
-- exact invariant checker.
+- double claim;
+- publish versus root invalidation; and
+- lease expiry versus publication.
 
-Report explored states, transitions, pruned equivalent states, and whether the cap was reached. Call this exhaustive only within those explicit bounds.
+Freeze repetitions and process/thread counts. Assert exact permitted outcomes and invariants after every race. These tests cover real concurrency that the serialized state model does not.
 
-### Layer 3: stateful property-based testing
+### 4. Pre-commit crash failpoints
 
-Use Hypothesis stateful testing against larger generated DAGs.
+Add test-only process failpoints after individual publication/invalidation writes but before commit. Terminate a subprocess at each frozen failpoint, reopen SQLite, and require either the complete transition or the complete pre-transition state—never a partial publication or invalidation.
 
-Prospective defaults:
+Transaction-boundary termination alone is insufficient evidence.
 
-- 10,000 examples;
-- up to 200 state-machine steps per example;
-- 2–8 workers;
-- 4–25 nodes;
-- fixed CI seed plus a second non-derandomized exploratory run;
-- deadline disabled; and
-- persistence of every minimized counterexample.
+### 5. Exact mutation sensitivity
 
-Bias generation toward boundary events: publication at lease expiry, invalidation immediately before publish, two roots changing across a shared descendant, response loss after commit, and stale retry after reopen.
-
-The confirmatory run uses frozen settings and is never silently rerun after failure. Hypothesis shrinking supplies the minimal receipt for any violation.
-
-### Layer 4: concurrency and crash integration
-
-Run real threads/processes against SQLite WAL mode:
-
-- synchronized double-claim races;
-- publish-versus-invalidate races;
-- kill worker processes at frozen checkpoints;
-- close and reopen the database after each injected crash; and
-- repeat accepted publication after simulated response loss.
-
-Use a frozen race count and process count. Record transaction results and full event logs. Do not infer exhaustive concurrency coverage from stress testing.
-
-## Mutation sensitivity
-
-Create isolated test-only mutants, one at a time:
+Freeze isolated test-only patches and the invariant expected to kill each:
 
 1. remove receipt validation;
-2. omit the parent-version comparison;
-3. permit two live claims;
+2. omit parent-version comparison;
+3. split claim/publication writes outside one transaction;
 4. accept an expired token;
 5. under-invalidate one descendant;
 6. over-invalidate an independent branch;
-7. allow duplicate node-version acceptance;
-8. let stale publication unlock children; and
-9. make packets or events mutable.
+7. return accepted-token replay after invalidation as current entitlement;
+8. validate a receipt against stale rather than claimed-version work; and
+9. partially commit invalidation.
 
-The experiment is sensitive only if the suite kills every declared mutant with the expected invariant. Surviving mutants are evidence of a coverage gap, even if the unmutated implementation passes.
+Every mutant must be killed. A surviving mutant is a coverage failure even if the unmodified scheduler passes.
 
-## Preregistered outcome
+## Supplementary robustness evidence
 
-The strong claim passes only if:
+After the load-bearing layers pass, run stateful property testing over generated DAGs:
+
+- 1,000 examples;
+- 75 steps maximum;
+- 2–8 workers and 4–25 nodes;
+- logical clock and deterministic confirmatory seed;
+- biased generation around expiry, invalidation, response loss, and shared descendants;
+- deadline disabled; and
+- persisted minimized counterexamples.
+
+Report transition and transition-pair coverage. Do not call generated serial API sequences real concurrency interleavings. This layer broadens robustness evidence but does not carry the core claim.
+
+## Separate liveness result
+
+Under a frozen fair-worker policy, no further root updates, valid discoverable receipts, and unexpired/reissued leases, test that every reachable frontier eventually reaches terminal verification. Report separately. Safety can pass while liveness fails.
+
+## Pass rule
+
+The fail-closed claim passes only if:
 
 - all deterministic transition tests pass;
-- bounded exploration finishes without invariant violation or clearly reports reaching its cap;
-- the confirmatory 10,000-example stateful run has zero invariant violations;
-- all frozen crash/race cases preserve safety;
-- the conditional liveness checks pass under their fair-worker assumptions; and
-- every declared mutant is killed.
+- bounded exploration completes below its cap with zero invariant violations;
+- every frozen real race has a permitted atomic outcome;
+- every pre-commit crash reopens to a complete before/after state;
+- every declared mutant is killed; and
+- all failures and minimized traces are retained.
 
-Any invariant violation fails the claim for the declared model. Fixes require a new version and separately preregistered rerun; the failing trace remains published.
+Any invariant violation fails this scheduler version. A fix requires a separately preregistered version and rerun.
 
-## Evidence and reporting
+## Permitted conclusion
 
-Publish:
+> Scheduler version X preserved the declared safety invariants over Y completely explored bounded states, Z frozen race schedules, C pre-commit crash points, and all M declared mutants under a trusted checker, scheduler process, SQLite engine, operating system, clock, and storage root.
 
-- fault-model manifest;
-- reference model and SUT adapter;
-- invariant definitions;
-- generator settings and seeds;
-- state/transition counts;
-- minimized counterexamples;
-- race/crash event logs;
-- mutation matrix;
-- code and artifact hashes; and
-- append-only work log.
-
-The permitted conclusion is:
-
-> Version X preserved all declared safety invariants across Y bounded states, Z stateful interleavings, the frozen crash/race suite, and all declared fault mutants.
-
-Do not shorten this to “the graph is safe” or extend it beyond the included faults and trusted computing base.
-
-## Relationship to an ecological demonstration
-
-The state-machine experiment is load-bearing for reliability. A later real coding-agent case is useful for ecological relevance, but it is not required to establish the bounded protocol invariant. Keep that case separate so model behavior cannot weaken or inflate the systems guarantee.
+Even after a pass, do not claim that hypothesis graphs are generally safe, Byzantine-fault tolerant, semantically correct, durable under storage rollback, or automatically confer these guarantees on arbitrary applications.
 
 ## Execution order
 
-1. Freeze the fault model and trusted computing base.
-2. Write invariant and mutant-sensitivity tests before changing the scheduler.
-3. Implement the independent reference model and SUT adapter.
-4. Run deterministic tests and bounded exploration.
-5. Freeze property settings, seeds, and crash schedule.
-6. Commit and push the preregistration before confirmatory outcomes.
-7. Run stateful, concurrency/crash, liveness, and mutation suites.
-8. Publish every failure and minimized trace; do not replace runs.
+1. Implement observability, deterministic dependencies, arbitrary fixtures, and semantics test-first.
+2. Freeze the transition table, projection, invariants, exhaustive bounds, races, failpoints, and exact mutant patches.
+3. Commit and push the preregistration before confirmatory outcomes.
+4. Run deterministic and bounded-exploration layers.
+5. Run races, crashes, and mutants.
+6. Run supplementary property and separate liveness suites.
+7. Publish every trace, state count, mutation result, and work-log decision.
