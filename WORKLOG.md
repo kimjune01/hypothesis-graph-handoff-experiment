@@ -247,6 +247,16 @@ Receipt: `concurrent-handoff-results.md`, `concurrent-handoff-result-hypothesis-
 
 Receipt: harness commit `dfd013b`, `concurrent-followup-preregistration.md`, `artifacts/concurrent-followup/`, and the next commit.
 
+## 2026-08-24 — Follow-up 1 infrastructure failure; Follow-up 2 freeze
+
+- Follow-up 1 worker 1 executed the supplied command with an accidental trailing `.` argument and exited during argument parsing with code 2 before registering or claiming work.
+- Workers 2 and 3 correctly registered and waited at the three-worker barrier. Interrupted them after diagnosing the missing third registration.
+- Preserved the Follow-up 1 database; no node was claimed and no task outcome was observed.
+- Froze Follow-up 2 as a separate run changing only the launch-message formatting. The exact shell command is placed alone in a fenced code block with no punctuation.
+- Reused the already frozen instance and packet artifacts because Follow-up 1 exposed no task result.
+
+Receipt: `concurrent-followup2-preregistration.md` and the next commit.
+
 ## 2026-08-24 — Economy of search added prospectively
 
 - Clarified the user's intended term: Peircean uberty is expected fertility, or how much new knowledge a move may produce.
