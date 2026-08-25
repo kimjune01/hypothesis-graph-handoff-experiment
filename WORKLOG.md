@@ -187,3 +187,14 @@ Receipt: `pow-recovery-preregistration.md`, `artifacts/pow-recovery/`, `prompts/
 - Interpretation: primary existence claim for selective recovery supported; Graph-over-Notes claim not supported.
 
 Receipt: `pow-recovery-results.md`, `pow-recovery-result-hypothesis-graph.md`, `runs/pow-recovery/`, and the next commit.
+
+## 2026-08-24 — Prospective concurrent-handoff round designed
+
+- Identified concurrency and clean entry points as a distinct untested motivation for the hypothesis graph.
+- Attempted a Claude design consultation; Claude Code returned the same organization-level HTTP 403 before producing advice. No Claude recommendation was available.
+- Designed three comparisons: serial versus concurrent Graph execution; Shared Notes versus manually Curated Packets versus mechanically generated Graph Packets; and a concurrent stale-root invalidation probe.
+- Added Curated Packets as the strongest baseline. This prevents attributing the general benefit of bounded context to graph structure.
+- Defined graph-native addressability, dependency-closure queries, atomic node claiming, automatic unlocking, and invalidation as the actual treatment—not graph-shaped prose.
+- No task instance, prompt, or outcome has been generated.
+
+Receipt: `concurrent-handoff-experiment-design.md` and the next commit.
