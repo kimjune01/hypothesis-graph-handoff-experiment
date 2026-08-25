@@ -17,11 +17,13 @@ class StalePublication(RuntimeError):
 
 
 class Scheduler:
-    def __init__(self, path: str | Path, lease_seconds: float = 60, *, clock=None, token_source=None):
+    def __init__(self, path: str | Path, lease_seconds: float = 60, *, clock=None,
+                 token_source=None, failpoint=None):
         self.path = str(path)
         self.lease_seconds = lease_seconds
         self._clock = clock or time.time
         self._token_source = token_source or (lambda: uuid.uuid4().hex)
+        self._failpoint = failpoint or (lambda _name: None)
         self._init()
 
     def _db(self):
@@ -275,6 +277,7 @@ class Scheduler:
                       "superseded": False}
             db.execute("UPDATE claims SET status='ACCEPTED',result=? WHERE token=?", (json.dumps(result), token))
             db.execute("UPDATE nodes SET state='VERIFIED',receipt=? WHERE id=?", (json.dumps(receipt, sort_keys=True), node["id"]))
+            self._failpoint("publication_after_node_write")
             detail = {"token": token, "node_version": claim["node_version"],
                       "parent_versions": json.loads(claim["parent_versions"])}
             acceptance_seq = self._event(db, "accept", node["id"], detail)
@@ -342,12 +345,14 @@ class Scheduler:
                 work = json.loads(root["work"])
                 work.update(work_patch)
                 db.execute("UPDATE nodes SET work=? WHERE id=?", (json.dumps(work, sort_keys=True), node_id))
-            for nid in affected:
+            for index, nid in enumerate(affected):
                 db.execute(
                     "UPDATE nodes SET state='BLOCKED',version=version+1,receipt=NULL WHERE id=?", (nid,)
                 )
                 db.execute("UPDATE claims SET status='CANCELLED' WHERE node_id=? AND status='LIVE'", (nid,))
                 self._event(db, "invalidate", nid, {"source": node_id, "authority": "root_update"})
+                if index == 0:
+                    self._failpoint("invalidation_after_first_node_write")
             db.execute(
                 "UPDATE nodes SET state='VERIFIED',receipt=? WHERE id=?",
                 (json.dumps(receipt, sort_keys=True), node_id),
