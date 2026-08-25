@@ -6,4 +6,6 @@ The outcome is deliberately narrow: all four conditions solved the task, while t
 
 A follow-up ecological ablation explicitly instructed both arms to use semantic memory. The graph oriented slightly faster, while concise chronological notes finished slightly faster and cost less. See `ecological-ablation-results.md` and `ecological-result-hypothesis-graph.md`.
 
+The strongest follow-up is orthogonal to model capability: versioned, receipt-checked graph memory failed closed throughout a bounded protocol exploration and targeted SQLite conformance, race, crash, and mutation suite. See `fail-closed-memory-results.md` and `fail-closed-memory-result-hypothesis-graph.md`. This is an implementation-scoped mechanism result, not a significance study.
+
 Licensed under AGPL-3.0-or-later.

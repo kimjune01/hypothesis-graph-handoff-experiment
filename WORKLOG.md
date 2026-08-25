@@ -329,3 +329,15 @@ Receipt: `fail-closed-memory-experiment-design.md`, implementation commit `f8864
 - Froze runner hash `aad9a73d...e381d8c` before confirmatory follow-up 2.
 
 Receipt: failed run output in the work log, mutation fix commit `6733cd4`, revised preregistration, and the next commit.
+
+## 2026-08-24 — Fail-closed confirmatory follow-up 2 passed
+
+- Full suite: 62 passed in 1.65 seconds; 37 tests directly concern the scheduler/fail-closed experiment.
+- Complete bounded protocol exploration: 14,967 states, 39,288 transitions, 24,322 equivalent states pruned, depth 6 reached, cap not hit, zero violations.
+- Frozen conformance basis: two traces, 18 public actions, 20 model/SQLite comparisons, ten dispositions, zero mismatches.
+- Six exact race/boundary schedules passed: same-node double claim, both publication/root-update orders, and immediately before/exactly at/immediately after expiry.
+- Both subprocess failpoints rolled back completely after process death before commit.
+- All seven isolated source mutants executed their selected tests and were killed by assertion failures (`pytest` code 1).
+- No randomized repetitions, statistical estimates, or post-outcome changes were used.
+
+Receipt: `fail-closed-memory-results.md`, `fail-closed-memory-result-hypothesis-graph.md`, and the next commit.

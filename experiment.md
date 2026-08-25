@@ -233,6 +233,16 @@ The two experiments support separable claims:
 - **External comparator:** capability through surprise from outside the model.
 - **Hypothesis graph:** accountable, reusable inquiry across agent boundaries.
 
+## Fail-closed mechanism result
+
+A separate bounded experiment now supports the narrower shared-memory claim without relying on model-performance effects:
+
+> When graph claims carry frozen work, dependency versions, and checkable receipts, the tested protocol rejects stale or unsupported worker publications instead of admitting them as current shared knowledge.
+
+The declarative protocol passed complete depth-6 exploration of 14,967 states. Scheduler commit `f88647b` matched the independent model on a frozen ten-disposition basis, passed six forced race/boundary schedules and two pre-commit crash probes, and killed seven exact source mutants. This is exact bounded evidence, not a significance study or a claim about arbitrary schedulers.
+
+This result makes **safer inheritance** the load-bearing experimentally supported extension of verifiable knowledge. Resumption cost, concurrency, and bounded packets remain useful demonstrations, but they do not carry the reliability claim.
+
 ## Minimum viable pilot
 
 - One bounded counterexample-search task for the instrumentation pilot.
