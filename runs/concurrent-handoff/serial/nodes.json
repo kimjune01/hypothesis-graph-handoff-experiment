@@ -1,0 +1,132 @@
+{
+  "R0": {
+    "id": "R0",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"kind\": \"root\", \"node_id\": \"R0\"}",
+    "expected_cost": 0.0,
+    "expected_yield": 0.0,
+    "tie_order": 0,
+    "receipt": "{\"kind\": \"root\", \"version\": 1}"
+  },
+  "GD": {
+    "id": "GD",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"kind\": \"gate\", \"n\": 21, \"node_id\": \"GD\"}",
+    "expected_cost": 1.0,
+    "expected_yield": 100.0,
+    "tie_order": 1,
+    "receipt": "{\"digest\": \"3e67e155490ee995f7bbde499de6113c401119a9cfa4a4c0c5cd94474c8be8f0\", \"kind\": \"gate\", \"node_id\": \"GD\", \"verdict\": false}"
+  },
+  "GA": {
+    "id": "GA",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"kind\": \"gate\", \"n\": 23, \"node_id\": \"GA\"}",
+    "expected_cost": 1.0,
+    "expected_yield": 90.0,
+    "tie_order": 2,
+    "receipt": "{\"digest\": \"ab49057b46d3c64a38f2d3f20e3ee588becd78e5dd697a61d24981d1a98d6001\", \"kind\": \"gate\", \"node_id\": \"GA\", \"verdict\": true}"
+  },
+  "GB": {
+    "id": "GB",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"kind\": \"gate\", \"n\": 29, \"node_id\": \"GB\"}",
+    "expected_cost": 1.0,
+    "expected_yield": 80.0,
+    "tie_order": 3,
+    "receipt": "{\"digest\": \"1569a2a5e929bc35ddc11ea2a3f6e5e7101e5df97c4332ef4a45a51ab167cff0\", \"kind\": \"gate\", \"node_id\": \"GB\", \"verdict\": true}"
+  },
+  "GC": {
+    "id": "GC",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"kind\": \"gate\", \"n\": 31, \"node_id\": \"GC\"}",
+    "expected_cost": 1.0,
+    "expected_yield": 70.0,
+    "tie_order": 4,
+    "receipt": "{\"digest\": \"c29f3873a3e19d033f160c87112e2d36aafa99297eecd114c68f58cc6f74b86e\", \"kind\": \"gate\", \"node_id\": \"GC\", \"verdict\": true}"
+  },
+  "GE": {
+    "id": "GE",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"kind\": \"gate\", \"n\": 37, \"node_id\": \"GE\"}",
+    "expected_cost": 1.0,
+    "expected_yield": 60.0,
+    "tie_order": 5,
+    "receipt": "{\"digest\": \"a9b8b2bd538d5b0dfcb586981ec82c656d62db9e5e3b8d0546c694cae91b46ae\", \"kind\": \"gate\", \"node_id\": \"GE\", \"verdict\": true}"
+  },
+  "A": {
+    "id": "A",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"challenge\": \"frozen:A\", \"difficulty\": 6, \"kind\": \"pow\", \"node_id\": \"A\"}",
+    "expected_cost": 100.0,
+    "expected_yield": 1.0,
+    "tie_order": 20,
+    "receipt": "{\"digest\": \"00000008b68cf5e5eb308c7cd2137944ecf6fc5ddf72b1212f79c65e50d5d01e\", \"kind\": \"pow\", \"node_id\": \"A\", \"nonce\": 8641801}"
+  },
+  "B": {
+    "id": "B",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"challenge\": \"frozen:B\", \"difficulty\": 6, \"kind\": \"pow\", \"node_id\": \"B\"}",
+    "expected_cost": 100.0,
+    "expected_yield": 1.0,
+    "tie_order": 21,
+    "receipt": "{\"digest\": \"000000858af4290b18259ac8e8469469b507192e7f4561229356bd5fe47327d1\", \"kind\": \"pow\", \"node_id\": \"B\", \"nonce\": 44853054}"
+  },
+  "C": {
+    "id": "C",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"challenge\": \"frozen:C\", \"difficulty\": 6, \"kind\": \"pow\", \"node_id\": \"C\"}",
+    "expected_cost": 100.0,
+    "expected_yield": 1.0,
+    "tie_order": 22,
+    "receipt": "{\"digest\": \"0000003780f09b501d281bf1c3050df0d3b448475c0b9e5ff665640ba6b043df\", \"kind\": \"pow\", \"node_id\": \"C\", \"nonce\": 18331937}"
+  },
+  "D": {
+    "id": "D",
+    "state": "KILLED",
+    "version": 1,
+    "work": "{\"challenge\": \"frozen:D\", \"difficulty\": 6, \"kind\": \"pow\", \"node_id\": \"D\"}",
+    "expected_cost": 100.0,
+    "expected_yield": 1.0,
+    "tie_order": 23,
+    "receipt": null
+  },
+  "X": {
+    "id": "X",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"challenge\": \"frozen:X\", \"difficulty\": 6, \"kind\": \"pow\", \"node_id\": \"X\"}",
+    "expected_cost": 100.0,
+    "expected_yield": 1.0,
+    "tie_order": 24,
+    "receipt": "{\"digest\": \"0000006eb9eef2465858cbe5aea527732d7b99e3369f6d8ca410f1c78290341d\", \"kind\": \"pow\", \"node_id\": \"X\", \"nonce\": 4028979}"
+  },
+  "JAB": {
+    "id": "JAB",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"challenge\": \"frozen:JAB\", \"difficulty\": 6, \"kind\": \"pow\", \"node_id\": \"JAB\"}",
+    "expected_cost": 100.0,
+    "expected_yield": 1.0,
+    "tie_order": 25,
+    "receipt": "{\"digest\": \"0000003339b1540466041c719ed60dbd0261136ebecf94bb74f4645e60e70c80\", \"kind\": \"pow\", \"node_id\": \"JAB\", \"nonce\": 10321645}"
+  },
+  "F": {
+    "id": "F",
+    "state": "VERIFIED",
+    "version": 1,
+    "work": "{\"challenge\": \"frozen:F\", \"difficulty\": 6, \"kind\": \"pow\", \"node_id\": \"F\"}",
+    "expected_cost": 100.0,
+    "expected_yield": 1.0,
+    "tie_order": 26,
+    "receipt": "{\"digest\": \"000000cf977642931bd44b744c5065c63f66027343cb67addced41b295803253\", \"kind\": \"pow\", \"node_id\": \"F\", \"nonce\": 19179632}"
+  }
+}

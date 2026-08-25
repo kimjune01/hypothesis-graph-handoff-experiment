@@ -1,0 +1,145 @@
+[
+  {
+    "token": "97ceec7c774440d3987b57bfec04d926",
+    "node_id": "GD",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619867.873157,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GD\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "9ed3807d643d45c6ac1f9f44de1c5e64",
+    "node_id": "GA",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619867.8766139,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GA\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "38bb87732efa406e94bc0506967a9b0f",
+    "node_id": "GB",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619867.880736,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GB\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "86cb1fab9e0f48b59e6bf7d4906410c1",
+    "node_id": "GC",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619867.883005,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GC\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "18dface8ef1f4f56aa7da29225bdb7c8",
+    "node_id": "GE",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619867.884133,
+    "parent_versions": "{\"R0\": 1}",
+    "status": "ACCEPTED",
+    "progress": 0,
+    "result": "{\"node_id\": \"GE\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "2172e210e83a403585086905b75eaf30",
+    "node_id": "A",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619867.8850272,
+    "parent_versions": "{\"GA\": 1}",
+    "status": "ACCEPTED",
+    "progress": 8640000,
+    "result": "{\"node_id\": \"A\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "28c181d7690c4cc0a4941dc388734931",
+    "node_id": "B",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619871.568077,
+    "parent_versions": "{\"GB\": 1}",
+    "status": "ACCEPTED",
+    "progress": 44850000,
+    "result": "{\"node_id\": \"B\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "cb5da72bfba84fc2baa43c64495f3515",
+    "node_id": "C",
+    "worker": "invalidate-3",
+    "run_id": "run",
+    "lease_until": 1787619878.857743,
+    "parent_versions": "{\"GC\": 1}",
+    "status": "ACCEPTED",
+    "progress": 18330000,
+    "result": "{\"node_id\": \"C\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "6f48fffdf79b48e59dc20651ff5ba7ba",
+    "node_id": "X",
+    "worker": "invalidate-3",
+    "run_id": "run",
+    "lease_until": 1787619886.823715,
+    "parent_versions": "{\"GE\": 1}",
+    "status": "ACCEPTED",
+    "progress": 4020000,
+    "result": "{\"node_id\": \"X\", \"status\": \"VERIFIED\", \"version\": 1}"
+  },
+  {
+    "token": "db9b6fb03732493bbc04501a57776636",
+    "node_id": "JAB",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619890.9442592,
+    "parent_versions": "{\"A\": 1, \"B\": 1}",
+    "status": "CANCELLED",
+    "progress": 120000,
+    "result": null
+  },
+  {
+    "token": "67907010dc5043e881d8449ee0887d78",
+    "node_id": "A",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619895.854246,
+    "parent_versions": "{\"GA\": 1}",
+    "status": "ACCEPTED",
+    "progress": 38350000,
+    "result": "{\"node_id\": \"A\", \"status\": \"VERIFIED\", \"version\": 2}"
+  },
+  {
+    "token": "67122f3e71b14478b860e5feae89b222",
+    "node_id": "JAB",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619910.799289,
+    "parent_versions": "{\"A\": 2, \"B\": 1}",
+    "status": "ACCEPTED",
+    "progress": 10320000,
+    "result": "{\"node_id\": \"JAB\", \"status\": \"VERIFIED\", \"version\": 2}"
+  },
+  {
+    "token": "415ffb7f91624a06bb560cb8b2d486ed",
+    "node_id": "F",
+    "worker": "invalidate-1",
+    "run_id": "run",
+    "lease_until": 1787619914.827756,
+    "parent_versions": "{\"C\": 1, \"JAB\": 2, \"X\": 1}",
+    "status": "ACCEPTED",
+    "progress": 19170000,
+    "result": "{\"node_id\": \"F\", \"status\": \"VERIFIED\", \"version\": 2}"
+  }
+]

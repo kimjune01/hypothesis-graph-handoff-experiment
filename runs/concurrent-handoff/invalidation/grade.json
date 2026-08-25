@@ -1,0 +1,46 @@
+{
+  "final_verified": true,
+  "bad_receipts": [],
+  "claim_order": [
+    "GD",
+    "GA",
+    "GB",
+    "GC",
+    "GE",
+    "A",
+    "B",
+    "C",
+    "X",
+    "JAB",
+    "A",
+    "JAB",
+    "F"
+  ],
+  "gate_order_correct": true,
+  "d_killed_and_unclaimed": true,
+  "abc_intervals": {
+    "A": [
+      1787619807.88505,
+      1787619811.5676732
+    ],
+    "B": [
+      1787619811.568117,
+      1787619830.9439192
+    ],
+    "C": [
+      1787619818.85777,
+      1787619826.823358
+    ]
+  },
+  "abc_all_overlap": false,
+  "elapsed_first_claim_to_f_seconds": 54.76714277267456,
+  "invalidated": [
+    "A",
+    "JAB",
+    "F"
+  ],
+  "cancelled_claims": [
+    "JAB"
+  ],
+  "duplicate_node_version_accepts": []
+}

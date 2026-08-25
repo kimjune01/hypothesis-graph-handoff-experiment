@@ -223,6 +223,19 @@ Receipt: revised `concurrent-handoff-experiment-design.md` and the next commit.
 
 Receipt: `concurrent-handoff-preregistration.md`, `prompts/concurrency-worker.md`, harness commit `b3747a9`, and the next commit.
 
+## 2026-08-24 — Concurrent handoff outcomes
+
+- Serial oracle passed exact F in 41.198 seconds from first claim, with all work on one fresh Codex subagent.
+- Three-worker concurrent run passed exact F in 34.403 seconds. B and C overlapped, but A and B were sequential on the first worker; the preregistered common A/B/C overlap criterion failed.
+- Diagnosed the cause from immutable events: no true post-gate start barrier existed, so startup skew let worker 1 clear all gates and claim A before the other workers entered. Preserved the failure and did not replace the run.
+- Economy ordering passed in every run: gates were claimed `GD,GA,GB,GC,GE` before workloads; GD killed D before claim. Exact D counterfactual was 23,635,954 candidates and 7.331 seconds avoided.
+- No-update control passed with no invalidation, cancellation, or recomputation.
+- Invalidation trigger fired after old JAB progress. Scheduler invalidated exactly `{A,JAB,F}`, cancelled active JAB, preserved `{B,C,X}`, and a preregistered retry recovered A, JAB, and F at version 2.
+- Discovered during analysis that oracle-curated packets/full Notes and the fixed-order comparator were not frozen before outcomes, despite the preregistration requiring them. Marked packet equivalence, context savings, and scheduling regret unobserved rather than reconstructing them.
+- Interpretation: economy gating and versioned recovery supported; safe two-worker overlap observed; full three-frontier concurrency and context-transfer claims not supported.
+
+Receipt: `concurrent-handoff-results.md`, `concurrent-handoff-result-hypothesis-graph.md`, exported run databases/events/grades, and the next commit.
+
 ## 2026-08-24 — Economy of search added prospectively
 
 - Clarified the user's intended term: Peircean uberty is expected fertility, or how much new knowledge a move may produce.
