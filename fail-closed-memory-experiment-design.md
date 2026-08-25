@@ -123,7 +123,7 @@ Transaction-boundary termination alone is insufficient evidence.
 
 ### 6. Exact mutation sensitivity
 
-Run the seven exact isolated source transformations in `fail_closed_mutations.py`: receipt bypass, node/parent-version entitlement bypass, expired-token acceptance, claim-exclusivity loss, under-invalidation, over-invalidation, and split publication transaction. Runner hash: `4c484e15c1a7dd5d434c6de8ff7d36493d940f7c0fe5613c432f2e521af23ac7`.
+Run the seven exact isolated source transformations in `fail_closed_mutations.py`: receipt bypass, node/parent-version entitlement bypass, expired-token acceptance, claim-exclusivity loss, under-invalidation, over-invalidation, and split publication transaction. A mutant counts as killed only when its selected test executes and fails (`pytest` exit code 1); collection, usage, interruption, or infrastructure errors fail the layer. Follow-up runner hash: `aad9a73dc56bfcd5acfc7c9ed2b03f5ca810f74c6548057cdaa68c764e381d8c`.
 
 Every mutant must be killed. A surviving mutant is a coverage failure even if the unmodified scheduler passes.
 

@@ -318,3 +318,14 @@ Receipt: revised `concurrent-handoff-experiment-design.md` and the next commit.
 - Froze commit, hashes, depth, cap, schedules, crash points, and mutants before the confirmatory run. Development outcomes are not reported as confirmatory outcomes.
 
 Receipt: `fail-closed-memory-experiment-design.md`, implementation commit `f88647b`, and the next preregistration commit.
+
+## 2026-08-24 — Fail-closed confirmation 1 failed; follow-up frozen
+
+- Confirmatory run 1 completed the 62-test suite, 14,967-state exploration, and 20 conformance comparisons without a reported invariant mismatch.
+- The version-entitlement mutant returned `pytest` code 4 because its source transformation produced invalid Python. The original runner counted every nonzero exit as a kill, so this was an invalid mutation result rather than evidence that a safety test detected the fault.
+- Marked the overall run failed under the preregistered rule; retained the outcome instead of reporting six valid kills as seven.
+- Fixed only the mutation transformation and kill criterion. A mutant now counts as killed only when its selected test executes and fails with `pytest` code 1. Development validation shows all seven transformations compile and produce code 1.
+- Scheduler, model, explorer, conformance traces, races, crash probes, depth, cap, and all other bounds remain unchanged.
+- Froze runner hash `aad9a73d...e381d8c` before confirmatory follow-up 2.
+
+Receipt: failed run output in the work log, mutation fix commit `6733cd4`, revised preregistration, and the next commit.
