@@ -198,3 +198,16 @@ Receipt: `pow-recovery-results.md`, `pow-recovery-result-hypothesis-graph.md`, `
 - No task instance, prompt, or outcome has been generated.
 
 Receipt: `concurrent-handoff-experiment-design.md` and the next commit.
+
+## 2026-08-24 — Independent review improves concurrency design
+
+- At the user's request, delegated an independent review to a fresh Codex subagent before implementation.
+- The reviewer identified that only three child workers can run concurrently because the root occupies one of four collaboration slots. Replaced the four-branch DAG with `R0→{A,B,C}`, `{A,B}→JAB`, and `{JAB,C}→F`.
+- Removed the heterogeneous task mixture because unmatched costs and verifiers would obscure coordination. Selected calibrated deterministic PoW.
+- Replaced the three-condition end-to-end comparison with a canonical packet-equivalence and byte-transfer audit. Curated packets remain the strong baseline without treating noisy coordinator-writing time as a primary outcome.
+- Specified a versioned scheduler with atomic claims, leases, parent-version vectors, exact publication checks, stale rejection, transitive invalidation, idempotency, and an immutable log.
+- Fixed invalidation after JAB claims the old A version and records a progress marker.
+- Narrowed claims to safe concurrency, automatic bounded entry packets, and localized versioned recovery on one frozen DAG.
+- No implementation or outcome has been generated.
+
+Receipt: revised `concurrent-handoff-experiment-design.md` and the next commit.

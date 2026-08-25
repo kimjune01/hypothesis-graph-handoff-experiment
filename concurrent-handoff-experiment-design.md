@@ -1,137 +1,133 @@
-# Concurrent handoff experiment round
+# Concurrent graph handoff experiment
 
-Status: prospective design only; no instance or outcome has been generated.
+Status: revised prospectively after independent subagent review; no instance or outcome has been generated.
 
-## Thesis under test
+## Claim under test
 
-> Verifiable handoff makes concurrent inquiry safe. Graph-addressable handoff makes it scalable by exposing independently claimable entry points with bounded dependency closures, without transferring the entire inquiry to every worker.
+> A versioned hypothesis graph can expose bounded, independently claimable entry points; support correct concurrent execution; and localize cancellation and recovery when an upstream root changes.
 
-This separates three mechanisms:
+This is a mechanism demonstration, not a population comparison. Previous rounds showed that concise Notes can equal Graph for single-agent reuse and recovery. This round tests graph-native querying, claiming, unlocking, version checking, and invalidation—not graph-shaped prose.
 
-1. **Reuse:** workers inherit verified prerequisites instead of rediscovering them.
-2. **Concurrency:** independent frontier nodes can be worked simultaneously.
-3. **Coordination:** entry-point assignment, publication, joins, and invalidation operate on addressable nodes.
+## Feasible frozen DAG
 
-Previous rounds tested single-agent reuse and recovery. They did not test concurrency or coordination.
-
-## Experimental task
-
-Construct one frozen, exactly graded inquiry DAG:
+The environment permits three concurrent child workers because the root coordinator occupies the fourth slot:
 
 ```text
-                 R0
-          /       |       \
-        A1        B1       C1       D1
-         \       /          \       /
-           JAB                JCD
-              \              /
-                       F
+                  R0
+               /  |  \
+              A   B   C
+               \ /
+               JAB
+                 \ /
+                  F
 ```
 
-- `R0` is a shared verified root.
-- `A1`–`D1` are four independently actionable, expensive-to-discover checkpoints.
-- `JAB` and `JCD` require their two parents.
-- `F` requires both joins.
-- Every node has pinned roots, an executable receipt, a kill condition, and a deterministic output contract.
+Edges: `R0→A`, `R0→B`, `R0→C`, `A→JAB`, `B→JAB`, `JAB→F`, `C→F`.
 
-Use heterogeneous bounded certificate tasks rather than six identical hashes if construction remains exactly gradeable: for example, one SAT witness, one bounded counterexample search, one optimization certificate, and one deterministic proof-of-work checkpoint. Verification must be much cheaper than discovery. If heterogeneous cost cannot be matched prospectively, use calibrated deterministic PoW and state that the demonstration concerns coordination rather than semantic reasoning.
+Use calibrated deterministic proof-of-work certificates. Frontier discovery should take approximately 15–30 seconds single-core; joins 5–10 seconds. Verification is one hash. Freeze challenges, lowest-valid nonces, process/thread count, and calibration before agent runs. Workers invoke provided `discover` and `check` commands; they do not edit scheduler or verifier code.
 
-Four workers start concurrently on `A1`–`D1`; join workers become eligible only after their prerequisites verify. A coordinator or scheduler owns assignment and publication. No worker may receive an answer for its own open node.
+## Executable scheduler semantics
 
-## Conditions
+Node states are `BLOCKED`, `OPEN`, `CLAIMED`, `VERIFIED`, and `STALE`.
 
-### 1. Shared Notes
+1. `BLOCKED→OPEN` exactly when all parents are `VERIFIED` at recorded versions.
+2. Claim is an atomic compare-and-swap `OPEN→CLAIMED` carrying worker ID, run ID, lease, claim token, and parent-version vector.
+3. Publish is accepted only with a live token and lease, unchanged verified parent versions, and an exact valid receipt.
+4. Otherwise publication is rejected as stale or invalid and cannot unlock children.
+5. Root rotation increments its version, marks it stale, transitively marks descendants stale/blocked, and cancels only affected live claims.
+6. Retry and publication are idempotent. Every transition enters an immutable event log.
 
-Every worker receives the same complete chronological inquiry notes, including all verified facts and dependency statements. The coordinator announces assignments in prose. Workers must locate their own prerequisite closure and report completion back through the shared log.
+Before agents run, tests must cover double-claim races, expired claims, duplicate publications, stale parent-version publications, exact transitive invalidation, unaffected-branch preservation, and deterministic reopening.
 
-### 2. Curated note packets
+The root may start workers and observe events, but must not manually assign substantive node context or relay dependency results. Workers claim and publish through the scheduler.
 
-A coordinator reads the chronological notes and manually prepares a task-local packet for each worker: objective, verified prerequisite closure, checks, output contract, and publication target. This is the strongest non-graph handoff and controls for the benefit of bounded context alone.
+## Experiment A: safe concurrent entry
 
-Packet-production time, coordinator tokens, and omissions are included in total cost.
+Start three fresh Codex subagents with the same minimal wrapper and access only to the scheduler client. Each calls `claim`, receives a mechanically generated entry packet, discovers and checks its node, and calls `publish`. Idle workers may subsequently claim `JAB` and `F` as they open.
 
-### 3. Graph entry packets
+Run the identical frozen nodes through the same scheduler with one worker and no overlap as a serial oracle.
 
-A mechanical scheduler queries open nodes, atomically claims one per worker, computes its prerequisite closure, and emits the same packet fields from the graph. Verified publications automatically unlock joins. Workers receive no full graph unless requested.
+Existence criteria:
 
-The intervention includes graph-native addressability, closure queries, claiming, unlocking, and invalidation. It is not merely graph-shaped prose.
+- both runs produce an exact final certificate;
+- `A`, `B`, and `C` have overlapping claimed intervals;
+- no node starts before prerequisites verify;
+- each node is accepted exactly once;
+- no packet contains the answer to its open node; and
+- concurrent frontier wall time is below serial frontier wall time, with contention reported.
 
-## Experiment A: concurrency mechanism
+Failure of the timing criterion does not erase a passing safety result.
 
-Compare one worker executing the frozen graph serially with four workers executing independent frontier nodes concurrently using Graph entry packets.
+## Experiment B: bounded entry-packet audit
 
-Primary existence criterion:
+This is an artifact audit, not three noisy end-to-end trials. For each open node construct prospectively:
 
-- both produce the exact certified final result; and
-- concurrent wall time from frontier release to all four branch publications is less than serial wall time, with CPU/API contention reported.
+1. the complete chronological Notes artifact;
+2. an oracle-curated minimum-sufficient note packet; and
+3. the mechanically emitted Graph packet.
 
-This demonstrates that independently verifiable handoffs permit safe parallel execution. It does not establish a general speedup.
+Oracle and Graph packets must be field-for-field equivalent on objective, verified prerequisite claims, roots, receipts, checks, kill conditions, output contract, and publication target. Neither may contain the open-node answer.
 
-## Experiment B: entry-point scalability
+Measure canonical UTF-8 bytes, full delivered prompt bytes separately, observable model input tokens, dependency-closure completeness, extraneous-node count, and mechanical packet-generation time. Report graph/scheduler authoring as setup cost or explicitly exclude it from the runtime claim.
 
-Run Shared Notes, Curated Packets, and Graph Packets with the same four-worker topology.
+Success shows that a graph query can automatically emit a sufficient bounded handoff. It does not show that a human could not curate an equivalent packet.
 
-Primary measurements:
+## Experiment C: versioned invalidation during concurrency
 
-- exact final certification and prerequisite compliance;
-- context bytes/tokens delivered to each worker before its first useful action;
-- total context transferred across workers;
-- time and cost to produce entry packets;
-- time to first useful action per worker;
-- duplicate node work and conflicting claims;
-- invalid early starts at `JAB`, `JCD`, or `F`;
-- wall-clock critical-path completion;
-- coordinator messages, tokens, and interventions.
+Give `A` its own versioned root; do not rotate shared `R0`. Trigger the update only after:
 
-The graph supports a scalability claim only if it matches the curated-packet condition on worker correctness and context while reducing packet-production or coordination cost. Beating Shared Notes alone shows that selective handoff helps, not that a graph is necessary.
+1. `A` and `B` verify;
+2. `JAB` is claimed with its parent-version vector;
+3. its worker records a frozen progress marker after a specified chunk; and
+4. JAB has not published.
 
-## Experiment C: concurrent invalidation
+Then rotate A's root. Expected behavior:
 
-After `A1` and `C1` publish and while downstream work is active, rotate one pinned root of `A1`. Freeze the event time by a task-state trigger, not wall-clock timing.
+- invalidate `A`, `JAB`, and `F`;
+- preserve `B`, `C`, and their receipts;
+- cancel the active JAB claim;
+- reject any later JAB publication carrying old A version;
+- reopen and recompute A, then JAB, then F; and
+- accept one exact final certificate.
 
-The correct response is to:
+Measure propagation and cancellation latency, stale publication rejection, wasted hashes after the trigger, over/under-invalidation, coordinator interventions, and recovery time. A no-update control uses the same marker but causes no cancellation or recomputation.
 
-- invalidate `A1`, `JAB`, and `F`;
-- preserve `B1`, `C1`, `D1`, and `JCD`;
-- cancel or reject publications rooted in stale `A1`;
-- reassign only the invalid frontier; and
-- resume joins after replacement receipts verify.
+## Measurements
 
-Measure propagation latency, wasted worker actions/tokens, over- and under-invalidation, stale publication acceptance, coordinator interventions, and recovery wall time.
+- exact per-node and final grading;
+- claim, first-tool-call, progress, publish, accept/reject, cancel, and reopen timestamps;
+- condition payload bytes, full prompt bytes, and observable input tokens;
+- hashes per node;
+- duplicate accepted work and double-claim attempts;
+- scheduler messages and transitions;
+- stale publications accepted/rejected;
+- over/under-invalidation; and
+- wall time, critical path, model cost, CPU/process count, and setup cost.
 
-## Controls
+Use claim-to-first-tool-call and claim-to-valid-publication timestamps rather than subjective “first useful action” judgments.
 
-- Same underlying Agent A trajectory and substantive facts projected into all conditions.
-- Same worker prompts, models, tools, budgets, start barrier, and node assignments where the condition permits assignments.
-- Exact graders for every node and final join; no LLM judge for correctness.
-- Packet content parity test: Graph and Curated packets must expose the same claims, receipts, roots, and contracts.
-- No-update control to detect unnecessary cancellations.
-- Serial oracle schedule to establish the correctness and critical-path ceiling.
-- Log all failed launches and infrastructure/model-routing changes without replacement.
+## Controls and integrity
 
-## Preregistered claims
+- TDD for scheduler, lock, version, packet, and exact-grader semantics.
+- Same Codex model family, wrapper, tools, budgets, and scheduler in serial and concurrent runs.
+- Fresh subagents with `fork_turns="none"` and node-local packets only.
+- Behavioral filesystem isolation disclosed; all agents technically share the workspace.
+- Hashes of tasks, packets, code, roots, and graders frozen before outcomes.
+- No failed run replaced; infrastructure/model-routing changes remain logged.
+- Publish raw worker traces, scheduler events, packets, grades, and work log.
 
-One frozen round can support only existence claims:
+## Claim boundary
 
-- **Concurrency:** verifiable node handoffs can support correct concurrent execution on this DAG.
-- **Bounded transfer:** graph queries can produce sufficient worker entry packets smaller than the full inquiry context.
-- **Coordination:** graph-native scheduling can claim, unlock, and selectively invalidate work correctly on this run.
+A passing round may show that safe concurrent execution occurred, graph queries emitted sufficient bounded packets, and versioned coordination rejected a stale publication and selectively recovered one subtree.
 
-It cannot establish typical speedup, scaling curves, or superiority across tasks. Those require multiple DAG sizes and repetitions.
+It may not show general superiority over curated Notes, persistent speedup, asymptotic scalability, or better reasoning from graph syntax. The treatment is explicitly a systems bundle—executable graph scheduler versus static artifacts—not a representation-only comparison.
 
-## Falsification
+## Execution order
 
-- If concurrent Graph execution violates dependencies or fails exact grading, the safety demonstration fails.
-- If Curated Packets match Graph including coordinator production cost, the graph-specific scalability claim is null.
-- If Graph wins only because its workers receive less substantive information, the comparison is invalid.
-- If all conditions are dominated by model startup latency or local CPU contention, wall-clock conclusions are withheld while correctness and context-transfer results remain reportable.
-
-## Recommended execution order
-
-1. Build and test the exact DAG, scheduler, claim lock, and graders.
-2. Calibrate node costs before freezing the instance.
-3. Run the serial oracle and no-update control.
-4. Freeze Agent A trajectory and all three projections.
-5. Randomize the three concurrent conditions.
-6. Run Experiment B, then the independently preregistered invalidation probes.
-7. Publish raw per-worker traces, packet contents, scheduler events, exact grades, and an append-only work log.
+1. Implement scheduler, client, generator, packet audit, and graders test-first.
+2. Calibrate work and freeze the instance.
+3. Pass race and invalidation tests.
+4. Freeze serial, concurrent, packet, and invalidation protocols.
+5. Run serial oracle, then concurrent entry demonstration.
+6. Run no-update control, then versioned invalidation demonstration.
+7. Grade, record a result graph and work log, commit, and push.
